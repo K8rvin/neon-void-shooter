@@ -1,0 +1,53 @@
+{
+  "id": "cardinal",
+  "promptVersion": 1,
+  "prompt": "Create one original, production-ready 2D game asset: a massive red and orange battleship spacecraft with heavy armored plating, very wide powerful wings, a broad reinforced nose, and one central violet gravity core held in an open armored cradle. Use large brutal geometric shapes and clearly readable armor layers. No emitted projectiles and no separate weapons.\n\nCamera: perfect orthographic top-down plan view, nose pointing exactly toward the top edge. Exact bilateral symmetry, no tilt, no perspective and no side view. Create a commanding large-boss silhouette that is clearly different from other bosses.\n\nReference 1 is only a rough guide to gameplay role and orientation. Do not copy its pixel-art rendering, original palette, silhouette details, or background. The written design brief has priority. Do not place the reference image itself in the scene.\n\nStyle: crisp detailed non-pixel vector game art, clean hard-edged geometric contours, restrained broad panel details, clear color blocking, and distinct engines. No tiny noisy greebles.\n\nComposition: exactly one complete ship, centered and large but with clear empty margin on every side. Show the entire nose, wings, appendages and engines without cropping. Pure uniform solid white background (#FFFFFF), no cast shadow and no scenery.\n\nAbsolutely no text, letters, numbers, logos, insignia, interface, border, stars, planets, landscape, people, pilots, debris, additional ships, additional weapons or separate objects.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\references\\rift.png",
+      "purpose": "Грубый ориентир боевой роли и ориентации; уникальный дизайн задаётся промтом"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "default UI setting (not changed)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\bosses\\cardinal-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\boss-cardinal.png",
+  "createdAt": "2026-11-09T16:56:12.289Z",
+  "visualCheck": "Approved: heavy battleship and visible violet gravity core; RGBA edges and transparent margins checked on light and dark backgrounds.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2276,
+    1856
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    512,
+    512
+  ],
+  "processing": "Border-connected background removal, matte color recovery, alpha crop, padding, one premultiplied-alpha LANCZOS resize, no upscaling",
+  "processingDetails": {
+    "sourceCutoutSize": [
+      2185,
+      1647
+    ],
+    "resizedObjectSize": [
+      476,
+      359
+    ],
+    "scaleApplied": 0.217849,
+    "upscaled": false,
+    "alphaCutoff": 16,
+    "visibleBounds": [
+      18,
+      76,
+      494,
+      435
+    ]
+  },
+  "processedAt": "2026-11-09T17:16:10.656019+00:00",
+  "componentFilter": {
+    "keptPixels": 1776913,
+    "candidatePixels": 1776966,
+    "ratio": 0.99997
+  }
+}

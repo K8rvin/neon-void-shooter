@@ -1,0 +1,53 @@
+{
+  "id": "interceptor",
+  "promptVersion": 1,
+  "prompt": "Create one original, production-ready 2D game asset: the exact cyan-blue and white interceptor from Reference 1, now redrawn as a clean combat sprite. Preserve its narrow agile silhouette, forward-swept wings, palette, and engine arrangement. Simplify the hull to a few large readable panels, keep the nose and twin engines distinct, and make it readable at 60 to 90 pixels.\n\nCamera: perfect orthographic top-down plan view, nose pointing exactly toward the top edge. Exact bilateral symmetry, no tilt, no perspective and no side view. Prioritize a bold readable combat silhouette and large shapes over small panels.\n\nReference 1 is the exact guide for the ship identity: match its silhouette, proportions, color palette and engine arrangement closely. Do not copy its background and do not create a UI portrait. Do not place the reference image itself in the scene.\n\nStyle: crisp detailed non-pixel vector game art, clean hard-edged geometric contours, restrained broad panel details, clear color blocking, and distinct engines. No tiny noisy greebles.\n\nComposition: exactly one complete ship, centered and large but with clear empty margin on every side. Show the entire nose, wings, appendages and engines without cropping. Pure uniform solid white background (#FFFFFF), no cast shadow and no scenery.\n\nAbsolutely no text, letters, numbers, logos, insignia, interface, border, stars, planets, landscape, people, pilots, debris, additional ships, additional weapons or separate objects.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\ships\\interceptor.png",
+      "purpose": "Точный силуэт, пропорции, палитра и расположение двигателей боевого корабля"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "default UI setting (not changed)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\players\\interceptor-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\players\\player-interceptor.png",
+  "createdAt": "2026-11-09T16:57:18.155Z",
+  "visualCheck": "Approved: cyan interceptor, complete nose, wings and engines; RGBA edges and transparent margins checked on light and dark backgrounds.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2368,
+    1822
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    256,
+    256
+  ],
+  "processing": "Border-connected background removal, matte color recovery, alpha crop, padding, one premultiplied-alpha LANCZOS resize, no upscaling",
+  "processingDetails": {
+    "sourceCutoutSize": [
+      2326,
+      1787
+    ],
+    "resizedObjectSize": [
+      232,
+      178
+    ],
+    "scaleApplied": 0.099742,
+    "upscaled": false,
+    "alphaCutoff": 16,
+    "visibleBounds": [
+      12,
+      39,
+      244,
+      217
+    ]
+  },
+  "processedAt": "2026-11-09T17:17:06.524737+00:00",
+  "componentFilter": {
+    "keptPixels": 1970418,
+    "candidatePixels": 1970418,
+    "ratio": 1.0
+  }
+}

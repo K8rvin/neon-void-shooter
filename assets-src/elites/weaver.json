@@ -1,0 +1,108 @@
+{
+  "id": "weaver",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-weaver.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.08684,
+          0.62944
+        ],
+        [
+          0.22724,
+          0.46563999999999994
+        ],
+        [
+          0.27404,
+          0.49683999999999995
+        ],
+        [
+          0.20384,
+          0.65284
+        ],
+        [
+          0.11804,
+          0.71524
+        ]
+      ],
+      [
+        [
+          0.88196,
+          0.71524
+        ],
+        [
+          0.79616,
+          0.65284
+        ],
+        [
+          0.7259599999999999,
+          0.49683999999999995
+        ],
+        [
+          0.77276,
+          0.46563999999999994
+        ],
+        [
+          0.91316,
+          0.62944
+        ]
+      ],
+      [
+        [
+          0.2643,
+          0.7945
+        ],
+        [
+          0.3189,
+          0.7087
+        ],
+        [
+          0.35009999999999997,
+          0.7477
+        ],
+        [
+          0.3267,
+          0.8491
+        ]
+      ],
+      [
+        [
+          0.6733,
+          0.8491
+        ],
+        [
+          0.6499,
+          0.7477
+        ],
+        [
+          0.6811,
+          0.7087
+        ],
+        [
+          0.7357,
+          0.7945
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.17,
+        0.6
+      ],
+      [
+        0.83,
+        0.6
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.156649
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-weaver.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:13.567244+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; cobalt body and cockpit preserved, gold wing/tail armor and cyan lights are distinct, alpha silhouette unchanged."
+}

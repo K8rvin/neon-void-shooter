@@ -1,0 +1,108 @@
+{
+  "id": "sniper",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-sniper.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.28672000000000003,
+          0.7986800000000001
+        ],
+        [
+          0.35691999999999996,
+          0.72068
+        ],
+        [
+          0.40371999999999997,
+          0.75968
+        ],
+        [
+          0.38032,
+          0.82988
+        ],
+        [
+          0.30232,
+          0.86108
+        ]
+      ],
+      [
+        [
+          0.69768,
+          0.86108
+        ],
+        [
+          0.61968,
+          0.82988
+        ],
+        [
+          0.5962799999999999,
+          0.75968
+        ],
+        [
+          0.64308,
+          0.72068
+        ],
+        [
+          0.71328,
+          0.7986800000000001
+        ]
+      ],
+      [
+        [
+          0.40825,
+          0.58605
+        ],
+        [
+          0.44725000000000004,
+          0.53925
+        ],
+        [
+          0.46285,
+          0.63285
+        ],
+        [
+          0.43165,
+          0.67185
+        ]
+      ],
+      [
+        [
+          0.5683499999999999,
+          0.67185
+        ],
+        [
+          0.53715,
+          0.63285
+        ],
+        [
+          0.5527500000000001,
+          0.53925
+        ],
+        [
+          0.59175,
+          0.58605
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.34,
+        0.79
+      ],
+      [
+        0.66,
+        0.79
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.217088
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-sniper.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:14.401357+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; teal/green body and long central cannon preserved, gold rear/side armor and cyan lights are distinct, alpha silhouette unchanged."
+}

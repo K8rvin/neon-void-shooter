@@ -1,0 +1,57 @@
+{
+  "id": "scout",
+  "promptVersion": 1,
+  "prompt": "Create one original, production-ready 2D game asset: a small narrow crimson-red arrow fighter with a sharp dart-like nose, a slim central fuselage, very short swept wings, and compact twin engines. Its silhouette must look light, fast, and distinctly narrower than the other enemies.\n\nCamera and orientation: perfect orthographic top-down plan view, with the nose pointing exactly toward the top edge of the image. No tilt, no perspective, no side view. Keep the design compact and bilaterally symmetrical, with a silhouette that remains distinguishable at small game size.\n\nReference 1 is attached only as a rough guide to the gameplay role and general silhouette family. Do not copy its pixel-art rendering, its orientation, its original palette, or its background. The written design brief above has priority. Do not place the reference image itself in the scene.\n\nStyle: crisp detailed non-pixel vector game art, clean hard-edged geometric contours, restrained broad panel details, and clear color blocking. Detail must remain readable and must not turn into tiny noisy greebles at small size.\n\nComposition: exactly one single complete ship, centered and large in the frame, with clear empty margin on every side. Show the entire nose, wings, appendages, and engines without cropping. Pure uniform solid white background (#FFFFFF), with no cast shadow and no background scenery.\n\nAbsolutely no text, letters, numbers, logos, insignia, interface, border, stars, planets, landscape, people, pilots, debris, additional ships, additional weapons, or separate objects.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\references\\scout.png",
+      "atlasKey": "enemyRed1.png",
+      "purpose": "Ориентир игровой роли и семейства силуэта; ракурс, ориентация, палитра и фон результата задаются промтом"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "default UI setting (not changed)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\enemies\\scout-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-scout.png",
+  "createdAt": "2026-11-09T09:43:29.898Z",
+  "visualCheck": "Approved: original and final 256x256 RGBA inspected individually and on light/dark sheets; complete narrow crimson arrow fighter, nose up, no text or extra objects, clean alpha edges, distinct 64px silhouette.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2752,
+    1536
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    256,
+    256
+  ],
+  "processing": "Border-connected white background removal, white-matte color recovery, background and post-resize alpha<16 cleanup, alpha crop, padding, one premultiplied-alpha LANCZOS resize, centered RGBA canvas; no upscaling",
+  "processingDetails": {
+    "sourceCutoutSize": [
+      807,
+      1168
+    ],
+    "resizedObjectSize": [
+      160,
+      232
+    ],
+    "requestedMinimumPadding": 12,
+    "scaleApplied": 0.19863,
+    "upscaled": false,
+    "visibleBounds": [
+      48,
+      12,
+      208,
+      244
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "visiblePixels": 15404,
+    "pixelsWithAlphaAtLeast16": 15404,
+    "programmaticCheck": "Passed: decoded PNG, RGBA, exact square dimensions, transparent and visible pixels, non-empty object, transparent margin on all sides, and no residual alpha values 1..15",
+    "alphaCutoff": 16
+  },
+  "processedAt": "2026-11-09T10:17:26.642951+00:00"
+}

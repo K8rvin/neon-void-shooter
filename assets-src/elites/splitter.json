@@ -1,0 +1,72 @@
+{
+  "id": "splitter",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-splitter.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.08244,
+          0.7138399999999999
+        ],
+        [
+          0.19164,
+          0.58124
+        ],
+        [
+          0.23844,
+          0.6280399999999999
+        ],
+        [
+          0.19164,
+          0.74504
+        ],
+        [
+          0.10583999999999999,
+          0.79184
+        ]
+      ],
+      [
+        [
+          0.8941600000000001,
+          0.79184
+        ],
+        [
+          0.8083600000000001,
+          0.74504
+        ],
+        [
+          0.76156,
+          0.6280399999999999
+        ],
+        [
+          0.8083600000000001,
+          0.58124
+        ],
+        [
+          0.9175599999999999,
+          0.7138399999999999
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.16,
+        0.7
+      ],
+      [
+        0.84,
+        0.7
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.094961
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-splitter.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:15.186689+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; violet twin pods and both original cyan cockpits fully preserved, gold outer-wing plates and cyan lights are distinct, alpha silhouette unchanged."
+}

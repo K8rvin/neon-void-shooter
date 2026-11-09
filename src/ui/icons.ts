@@ -1,0 +1,43 @@
+const PATHS: Record<string, string> = {
+  pulse: '<path d="M7 20V8l2-4 2 4v12M15 20V4l2-2 2 2v16"/>',
+  scatter: '<path d="M4 20 8 4M10 20l2-18M16 20l4-16M4 20h16"/>',
+  beam: '<path d="M11 22V2h2v20M7 5h10M7 19h10"/>',
+  arc: '<path d="m14 2-8 11h6l-2 9 8-12h-6z"/>',
+  dash: '<path d="m4 5 6 7-6 7M12 5l6 7-6 7"/>',
+  slow: '<circle cx="12" cy="13" r="8"/><path d="M12 8v5l4 2M9 2h6"/>',
+  gravity: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>',
+  drones: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 4"/><path d="m19 5 2-2M5 19l-2 2"/>',
+  purge: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  overclock: '<path d="M4 18a9 9 0 1 1 16 0M12 13l6-6M7 18h10"/><path d="m16 3 3-2 2 2-2 3z"/>',
+  dashNova: '<path d="m3 8 5 4-5 4M11 3v4M11 17v4M11 9l3 3-3 3M17 7l4 5-4 5"/>',
+  siege: '<path d="m12 2 4 7v8l-4 5-4-5V9zM8 12H4v5h4M16 12h4v5h-4M10 17l-3 4M14 17l3 4"/>',
+  shieldPulse: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/><path d="M12 7v10M7 12h10"/>',
+  droneProtocol: '<circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="5"/><path d="m18 5 3 2-1 3M6 19l-3-2 1-3"/>',
+  repairSwarm: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/><path d="m18 3 3 3M3 18l3 3"/>',
+  phaseEcho: '<path d="m9 4 7 8-7 8-7-8z"/><path d="m15 4 7 8-7 8M15 8l3 4-3 4"/>',
+  voidPurge: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/><path d="m12 6 1.7 4.3L18 12l-4.3 1.7L12 18l-1.7-4.3L6 12l4.3-1.7z"/>',
+  ionLance: '<path d="M12 1v22M8 6l4-5 4 5M6 12h12M8 18h8"/>',
+  novaArray: '<path d="m4 18 4-12M10 20l2-18M16 18l4-12M3 8l5-4 2 5M12 4l4-2 4 4"/>',
+  stormProtocol: '<path d="m13 2-8 10h6l-1 5 5-7M15 12l-3 10 9-13h-6l3-7"/>',
+  aegis: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/><path d="m12 6 1.7 4.3L18 12l-4.3 1.7L12 18l-1.7-4.3L6 12l4.3-1.7z"/>',
+  phantomDrones: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 4"/><path d="m3 12 3-3M18 15l3-3"/>',
+  rocketSwarm: '<path d="m7 14 3 4v4H6v-4zM15 14l3 4v4h-4v-4zM10 2l2-1 2 1v12h-4zM7 6v6M17 6v6"/>',
+  damage: '<path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/>',
+  hull: '<path d="m12 2 9 5v10l-9 5-9-5V7z"/><path d="m12 6 5 3v6l-5 3-5-3V9z"/>',
+  rapid: '<path d="M3 8c3-4 6 4 9 0s6 4 9 0M3 16c3-4 6 4 9 0s6 4 9 0"/>',
+  shield: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/>',
+  mobility: '<path d="M3 7h14M13 3l4 4-4 4M21 17H7M11 13l-4 4 4 4"/>',
+  critical: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
+  missiles: '<path d="m12 2 9 19H3z"/><path d="M12 8v5M12 17v1"/>',
+  xp: '<path d="m12 2 9 10-9 10-9-10z"/><path d="m8 12 4-4 4 4-4 4z"/>',
+  scavenger: '<path d="m12 2 9 10-9 10-9-10z"/><path d="M7 12h10M12 7v10"/>',
+  armor: '<path d="M4 4h16v16H4zM8 8h8v8H8z"/>',
+  regen: '<path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/>',
+  fortune: '<path d="m12 2 9 10-9 10-9-10z"/><path d="m12 6 1.5 4.5L18 12l-4.5 1.5L12 18l-1.5-4.5L6 12l4.5-1.5z"/>',
+};
+
+export function icon(id: string, fallback = '✦'): string {
+  const path = PATHS[id];
+  if (!path) return `<span class="icon-fallback" aria-hidden="true">${fallback}</span>`;
+  return `<svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+}

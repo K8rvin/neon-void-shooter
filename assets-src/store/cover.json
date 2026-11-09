@@ -1,0 +1,37 @@
+{
+  "id": "cover",
+  "promptVersion": 1,
+  "prompt": "Create colorful cinematic key art for a space shooter. A small cyan-blue and white interceptor is at the bottom, nose pointing up, flying toward a much larger white, gold and cobalt ring-core boss above it. Use a rich deep blue and violet nebula, strong scale contrast, crisp unmistakable silhouettes, dramatic but controlled lighting, and clear separation between the two ships. The interceptor must remain small but readable and the boss ring must be obvious. No additional ships, no text, no logo, no HUD, no interface frame, and no distorted or stretched spacecraft.\n\nReference 1 is the exact design, silhouette and cyan/white palette for the small interceptor at the bottom. Reference 2 is the exact design, white/gold/cobalt palette, circular ring core and four technological projections for the large boss. Redraw both as one coherent scene; do not use either reference as a background, do not make a collage, and do not paste reference frames into the image. Preserve their proportions and recognizable features without stretching.\n\nCompose for a 16:9 frame with both ships fully visible and clear margin around them. Non-pixel polished game key art with clean vector-like ship contours and a detailed nebula background. Absolutely no text, letters, numbers, logos, watermarks, HUD, interface elements or decorative UI borders.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\ships\\interceptor.png",
+      "purpose": "Reference 1: точный дизайн маленького cyan/white interceptor в нижней части обложки"
+    },
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\boss-omega.png",
+      "purpose": "Reference 2: точный дизайн большого white/gold/cobalt ring-core boss"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "16:9 (selected in Gemini UI)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\store\\cover-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\store\\cover.png",
+  "createdAt": "2026-11-09T17:11:30.725Z",
+  "visualCheck": "Approved: 1280x720 key art reviewed; complete interceptor and ring-core boss, coherent nebula scene, no text, logos, HUD or collage borders.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2752,
+    1536
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    1280,
+    720
+  ],
+  "processing": "Center cover crop to 16:9, RGB conversion, premultiplied-alpha LANCZOS where applicable, no artificial upscaling",
+  "cardSize": [
+    512,
+    288
+  ],
+  "processedAt": "2026-11-09T17:37:26.775847+00:00"
+}

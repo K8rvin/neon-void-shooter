@@ -1,0 +1,108 @@
+{
+  "id": "scout",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-scout.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.20936,
+          0.71648
+        ],
+        [
+          0.30296,
+          0.62288
+        ],
+        [
+          0.34196,
+          0.64628
+        ],
+        [
+          0.30296,
+          0.74768
+        ],
+        [
+          0.23276,
+          0.78668
+        ]
+      ],
+      [
+        [
+          0.76724,
+          0.78668
+        ],
+        [
+          0.69704,
+          0.74768
+        ],
+        [
+          0.65804,
+          0.64628
+        ],
+        [
+          0.69704,
+          0.62288
+        ],
+        [
+          0.79064,
+          0.71648
+        ]
+      ],
+      [
+        [
+          0.36045,
+          0.75715
+        ],
+        [
+          0.40725,
+          0.71815
+        ],
+        [
+          0.43065,
+          0.81175
+        ],
+        [
+          0.39165,
+          0.84295
+        ]
+      ],
+      [
+        [
+          0.60835,
+          0.84295
+        ],
+        [
+          0.56935,
+          0.81175
+        ],
+        [
+          0.59275,
+          0.71815
+        ],
+        [
+          0.6395500000000001,
+          0.75715
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.25,
+        0.69
+      ],
+      [
+        0.75,
+        0.69
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.148909
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-scout.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:12.963928+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; crimson body and cockpit preserved, gold wing armor and cyan lights are distinct, alpha silhouette unchanged."
+}

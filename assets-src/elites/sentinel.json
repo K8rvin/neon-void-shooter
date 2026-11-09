@@ -1,0 +1,124 @@
+{
+  "id": "sentinel",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-sentinel.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.07833333333333332,
+          0.41456666666666664
+        ],
+        [
+          0.15633333333333332,
+          0.32876666666666665
+        ],
+        [
+          0.21873333333333334,
+          0.39116666666666666
+        ],
+        [
+          0.20313333333333333,
+          0.5861666666666666
+        ],
+        [
+          0.12513333333333332,
+          0.6719666666666666
+        ],
+        [
+          0.07833333333333332,
+          0.6173666666666666
+        ]
+      ],
+      [
+        [
+          0.9216666666666666,
+          0.6173666666666666
+        ],
+        [
+          0.8748666666666667,
+          0.6719666666666666
+        ],
+        [
+          0.7968666666666666,
+          0.5861666666666666
+        ],
+        [
+          0.7812666666666667,
+          0.39116666666666666
+        ],
+        [
+          0.8436666666666667,
+          0.32876666666666665
+        ],
+        [
+          0.9216666666666666,
+          0.41456666666666664
+        ]
+      ],
+      [
+        [
+          0.09716,
+          0.6666000000000001
+        ],
+        [
+          0.16736,
+          0.5963999999999999
+        ],
+        [
+          0.21416000000000002,
+          0.651
+        ],
+        [
+          0.19076,
+          0.7524000000000001
+        ],
+        [
+          0.12056,
+          0.7836000000000001
+        ]
+      ],
+      [
+        [
+          0.87944,
+          0.7836000000000001
+        ],
+        [
+          0.8092400000000001,
+          0.7524000000000001
+        ],
+        [
+          0.78584,
+          0.651
+        ],
+        [
+          0.8326399999999999,
+          0.5963999999999999
+        ],
+        [
+          0.90284,
+          0.6666000000000001
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.14,
+        0.47
+      ],
+      [
+        0.86,
+        0.47
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.207779
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-sentinel.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:15.908893+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; green/teal hull and complete annular shield emitter preserved, gold side armor and cyan lights are distinct, alpha silhouette unchanged."
+}

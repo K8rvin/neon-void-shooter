@@ -1,0 +1,150 @@
+{
+  "id": "meteor-1",
+  "seed": 731041,
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic radial irregular contour, two Chaikin smoothing passes, seeded texture and directional lighting, translucent shaded facets, layered rotated crater rims, surface grain, 4x antialiasing and premultiplied-alpha LANCZOS export",
+    "contourNormalized": [
+      [
+        0.51039,
+        0.16224
+      ],
+      [
+        0.65067,
+        0.16839
+      ],
+      [
+        0.74376,
+        0.30664
+      ],
+      [
+        0.79321,
+        0.40421
+      ],
+      [
+        0.90689,
+        0.54107
+      ],
+      [
+        0.7912,
+        0.64712
+      ],
+      [
+        0.73639,
+        0.77325
+      ],
+      [
+        0.60228,
+        0.83872
+      ],
+      [
+        0.41279,
+        0.7858
+      ],
+      [
+        0.26298,
+        0.79825
+      ],
+      [
+        0.17316,
+        0.6799
+      ],
+      [
+        0.09032,
+        0.52388
+      ],
+      [
+        0.12305,
+        0.3975
+      ],
+      [
+        0.233,
+        0.30845
+      ],
+      [
+        0.34949,
+        0.19906
+      ]
+    ],
+    "paletteRGB": [
+      116,
+      108,
+      96
+    ],
+    "craters": [
+      {
+        "center": [
+          0.2737,
+          0.4403
+        ],
+        "radius": [
+          45,
+          28
+        ],
+        "rotation": -30.73
+      },
+      {
+        "center": [
+          0.4522,
+          0.4011
+        ],
+        "radius": [
+          49,
+          32
+        ],
+        "rotation": -54.59
+      },
+      {
+        "center": [
+          0.4862,
+          0.3336
+        ],
+        "radius": [
+          37,
+          33
+        ],
+        "rotation": 9.05
+      },
+      {
+        "center": [
+          0.6012,
+          0.5268
+        ],
+        "radius": [
+          53,
+          38
+        ],
+        "rotation": -0.16
+      },
+      {
+        "center": [
+          0.3608,
+          0.4798
+        ],
+        "radius": [
+          47,
+          34
+        ],
+        "rotation": 35.36
+      },
+      {
+        "center": [
+          0.3724,
+          0.3744
+        ],
+        "radius": [
+          52,
+          44
+        ],
+        "rotation": -21.37
+      }
+    ]
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\asteroids\\meteor-1.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:32:25.458052+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and on light/dark sheets at 256px and 64px; broad irregular contour, subdued shaded facets and separated crater rims are readable, transparent margin is clean, no background or text."
+}

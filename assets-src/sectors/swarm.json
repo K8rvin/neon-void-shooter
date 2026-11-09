@@ -1,0 +1,31 @@
+{
+  "id": "swarm",
+  "promptVersion": 1,
+  "prompt": "Create a full-screen dark organic cosmic region with distant abstract alien silhouettes, subtle nebulous tendrils, and restrained green bioluminescent glow mostly near the outer edges. Keep the central combat area dark, empty, and quiet. No close-up creature and no spacecraft.\n\nThis is a FULL-BLEED low-contrast background for a top-down arcade shooter, not a cutout object and not a poster. Fill the entire 16:9 frame edge to edge. Use smooth detailed non-pixel digital environment art with restrained contrast and muted brightness. The central 60 percent of the image must remain especially dark and readable for gameplay. Do not place a bright focal object in the center.\n\nNo text, letters, numbers, logos, HUD, interface, borders, large planets, close-up spacecraft, projectiles, laser beams, explosions, or foreground objects. No white background and no transparent areas.",
+  "references": [],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "16:9 (selected in Gemini UI)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\sectors\\swarm-original.png",
+  "processed": {
+    "background": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\sectors\\swarm-bg.webp",
+    "card": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\sectors\\swarm-card.png"
+  },
+  "createdAt": "2026-11-09T17:03:05.638Z",
+  "visualCheck": "Approved: 1280x720 background and 512x288 route card reviewed; subdued green bioluminescence, dark combat center, no text or spacecraft.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2752,
+    1536
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    1280,
+    720
+  ],
+  "processing": "Center cover crop to 16:9, RGB conversion, premultiplied-alpha LANCZOS where applicable, no artificial upscaling",
+  "cardSize": [
+    512,
+    288
+  ],
+  "processedAt": "2026-11-09T17:37:19.758952+00:00"
+}

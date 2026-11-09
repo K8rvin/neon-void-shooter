@@ -1,0 +1,31 @@
+{
+  "id": "asteroids",
+  "promptVersion": 1,
+  "prompt": "Create a full-screen deep charcoal-blue asteroid region with distant small rock fragments, sparse dust belts, and restrained warm amber reflections. Keep most fragments near the outer edges and the central combat area dark, empty, and quiet.\n\nThis is a FULL-BLEED low-contrast background for a top-down arcade shooter, not a cutout object and not a poster. Fill the entire 16:9 frame edge to edge. Use smooth detailed non-pixel digital environment art with restrained contrast and muted brightness. The central 60 percent of the image must remain especially dark and readable for gameplay. Do not place a bright focal object in the center.\n\nNo text, letters, numbers, logos, HUD, interface, borders, large planets, close-up spacecraft, projectiles, laser beams, explosions, or foreground objects. No white background and no transparent areas.",
+  "references": [],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "16:9 (selected in Gemini UI)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\sectors\\asteroids-original.png",
+  "processed": {
+    "background": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\sectors\\asteroids-bg.webp",
+    "card": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\sectors\\asteroids-card.png"
+  },
+  "createdAt": "2026-11-09T17:02:06.279Z",
+  "visualCheck": "Approved: 1280x720 background and 512x288 route card reviewed; quiet dark combat center, restrained amber debris, no text or HUD.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2752,
+    1536
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    1280,
+    720
+  ],
+  "processing": "Center cover crop to 16:9, RGB conversion, premultiplied-alpha LANCZOS where applicable, no artificial upscaling",
+  "cardSize": [
+    512,
+    288
+  ],
+  "processedAt": "2026-11-09T17:37:17.961586+00:00"
+}

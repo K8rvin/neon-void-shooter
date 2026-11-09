@@ -1,0 +1,53 @@
+{
+  "id": "carrier",
+  "promptVersion": 1,
+  "prompt": "Create one original, production-ready 2D game asset: the exact amber-orange and white carrier from Reference 1, now redrawn as a clean combat sprite. Preserve its broad command hull, two drone bays, palette, and engine arrangement. Keep the bays large and clear, simplify small panels, and make it readable at 60 to 90 pixels. No drones or escort ships.\n\nCamera: perfect orthographic top-down plan view, nose pointing exactly toward the top edge. Exact bilateral symmetry, no tilt, no perspective and no side view. Prioritize a bold readable combat silhouette and large shapes over small panels.\n\nReference 1 is the exact guide for the ship identity: match its silhouette, proportions, color palette and engine arrangement closely. Do not copy its background and do not create a UI portrait. Do not place the reference image itself in the scene.\n\nStyle: crisp detailed non-pixel vector game art, clean hard-edged geometric contours, restrained broad panel details, clear color blocking, and distinct engines. No tiny noisy greebles.\n\nComposition: exactly one complete ship, centered and large but with clear empty margin on every side. Show the entire nose, wings, appendages and engines without cropping. Pure uniform solid white background (#FFFFFF), no cast shadow and no scenery.\n\nAbsolutely no text, letters, numbers, logos, insignia, interface, border, stars, planets, landscape, people, pilots, debris, additional ships, additional weapons or separate objects.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\ships\\carrier.png",
+      "purpose": "Точный силуэт, пропорции, палитра и расположение двигателей боевого корабля"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "default UI setting (not changed)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\players\\carrier-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\players\\player-carrier.png",
+  "createdAt": "2026-11-09T16:59:47.769Z",
+  "visualCheck": "Approved: amber carrier and two drone bays; RGBA edges and transparent margins checked on light and dark backgrounds.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2510,
+    1696
+  ],
+  "originalMode": "RGB",
+  "processedSize": [
+    256,
+    256
+  ],
+  "processing": "Border-connected background removal, matte color recovery, alpha crop, padding, one premultiplied-alpha LANCZOS resize, no upscaling",
+  "processingDetails": {
+    "sourceCutoutSize": [
+      2474,
+      1661
+    ],
+    "resizedObjectSize": [
+      232,
+      156
+    ],
+    "scaleApplied": 0.093775,
+    "upscaled": false,
+    "alphaCutoff": 16,
+    "visibleBounds": [
+      12,
+      50,
+      244,
+      206
+    ]
+  },
+  "processedAt": "2026-11-09T17:18:30.326506+00:00",
+  "componentFilter": {
+    "keptPixels": 2283287,
+    "candidatePixels": 2283289,
+    "ratio": 0.999999
+  }
+}

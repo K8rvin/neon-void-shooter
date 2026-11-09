@@ -1,0 +1,27 @@
+{
+  "id": "carrier",
+  "promptVersion": 1,
+  "prompt": "Создай один законченный игровой ассет: a medium carrier spaceship with a broad command hull and drone bays on both wings, amber orange and white.\nВид строго сверху, нос корабля направлен вверх, симметричная компоновка. Футуристическая гладкая векторная иллюстрация высокой детализации, четкие геометрические контуры и аккуратные панели, небольшие cyan-светящиеся двигатели.\nИспользуй прикреплённый Reference 1 только как точное руководство по силуэту, пропорциям и цвету, не как фон и не как изображение для размещения в кадре.\nОдин корабль целиком, крупно в центре, белый фон для последующего удаления фона. Без текста, логотипов, интерфейса, людей, пилотов, планет, звёзд, ландшафта, теней от других объектов и дополнительных кораблей. Не обрезай крылья и нос.",
+  "references": [
+    {
+      "path": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\ship-carrier.png",
+      "purpose": "Точный силуэт, пропорции и цветовая схема корабля"
+    }
+  ],
+  "mode": "Gemini UI / создание изображений",
+  "aspectRatio": "default UI setting (not changed)",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\ships\\carrier-original.png",
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\ships\\carrier.png",
+  "createdAt": "2026-11-09T08:08:33.268Z",
+  "visualCheck": "Approved: amber carrier, broad command hull and paired drone bays, no text or scenery; RGBA edges checked on dark and light backgrounds.",
+  "originalFormat": "JPEG",
+  "originalSize": [
+    2528,
+    1692
+  ],
+  "processedSize": [
+    768,
+    519
+  ],
+  "processing": "Border-connected background removal, white-matte color recovery, alpha crop, padding, premultiplied-alpha LANCZOS resize"
+}

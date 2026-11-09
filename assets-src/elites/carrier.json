@@ -1,0 +1,116 @@
+{
+  "id": "carrier",
+  "source": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\combat\\enemy-carrier.png",
+  "algorithm": {
+    "version": 1,
+    "description": "Deterministic 4x Pillow vector armor plates with bevels and cyan lights; shapes clipped to source alpha; base palette and central cockpit/core preserved; source alpha restored exactly",
+    "platesNormalized": [
+      [
+        [
+          0.08023999999999999,
+          0.41364
+        ],
+        [
+          0.16604000000000002,
+          0.32004
+        ],
+        [
+          0.21284,
+          0.37464
+        ],
+        [
+          0.19724,
+          0.56964
+        ],
+        [
+          0.10364,
+          0.63204
+        ]
+      ],
+      [
+        [
+          0.89636,
+          0.63204
+        ],
+        [
+          0.80276,
+          0.56964
+        ],
+        [
+          0.7871600000000001,
+          0.37464
+        ],
+        [
+          0.83396,
+          0.32004
+        ],
+        [
+          0.91976,
+          0.41364
+        ]
+      ],
+      [
+        [
+          0.2354,
+          0.7566
+        ],
+        [
+          0.3056,
+          0.7020000000000001
+        ],
+        [
+          0.3368,
+          0.7488
+        ],
+        [
+          0.3134,
+          0.8346
+        ],
+        [
+          0.2588,
+          0.858
+        ]
+      ],
+      [
+        [
+          0.7412,
+          0.858
+        ],
+        [
+          0.6866,
+          0.8346
+        ],
+        [
+          0.6632,
+          0.7488
+        ],
+        [
+          0.6943999999999999,
+          0.7020000000000001
+        ],
+        [
+          0.7646000000000001,
+          0.7566
+        ]
+      ]
+    ],
+    "cyanLightsNormalized": [
+      [
+        0.15,
+        0.46
+      ],
+      [
+        0.85,
+        0.46
+      ]
+    ],
+    "changedVisiblePixelFraction": 0.14657
+  },
+  "processed": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\elites\\elite-carrier.png",
+  "processedSize": [
+    256,
+    256
+  ],
+  "createdAt": "2026-11-09T11:26:15.538426+00:00",
+  "visualCheck": "Approved: final 256x256 RGBA inspected individually and beside the normal ship on dark background at 160px and 64px; black/magenta hull and both hangar bays preserved, gold outer armor and cyan lights are distinct, alpha silhouette unchanged."
+}
