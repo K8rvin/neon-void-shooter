@@ -92,6 +92,7 @@ export class UI implements GameView {
 
   private updateLoadout(): void {
     const save = this.game.save.data;
+    this.element('quick-start').classList.toggle('active', save.runs === 0);
     const ship = SHIPS[save.selectedShip];
     const stats = createBaseStats(save.meta);
     ship.apply(stats);
@@ -285,6 +286,13 @@ export class UI implements GameView {
     const secondaryStatus = snapshot.secondaryName ? ` · E ${snapshot.secondaryCooldown <= 0 ? 'ГОТОВО' : `${snapshot.secondaryCooldown.toFixed(1)}с`}` : '';
     this.element('ability-status').textContent = `${snapshot.abilityActive ? 'АКТИВНО' : snapshot.abilityCooldown <= 0 ? 'Q · ГОТОВО' : `${snapshot.abilityCooldown.toFixed(1)}с`}${secondaryStatus}`;
     this.element('ability-status').classList.toggle('ready', snapshot.abilityCooldown <= 0 || snapshot.abilityActive);
+    (this.element('touch-missiles') as HTMLButtonElement).disabled = snapshot.missileCooldown > 0;
+    (this.element('touch-ability') as HTMLButtonElement).disabled = snapshot.abilityCooldown > 0;
+    this.element('touch-ability-label').textContent = snapshot.abilityName;
+    const touchSecondary = this.element('touch-secondary') as HTMLButtonElement;
+    touchSecondary.hidden = !snapshot.secondaryName;
+    touchSecondary.disabled = snapshot.secondaryCooldown > 0;
+    this.element('touch-secondary-label').textContent = snapshot.secondaryName;
     this.element('overdrive').classList.toggle('visible', snapshot.overdrive > 0);
     this.element('overdrive-time').textContent = snapshot.overdrive.toFixed(1);
     const bossVisible = snapshot.bossMaxHp > 0;
@@ -463,8 +471,19 @@ export class UI implements GameView {
       switch (action) {
         case 'start': this.game.openLoadout(); break;
         case 'restart': this.game.openLoadout(); break;
+        case 'quick-start':
+          this.game.save.selectShip('interceptor');
+          this.selectedWeapon = 'pulse';
+          this.selectedAbility = 'dash';
+          this.difficulty = 'veteran';
+          this.selectedMode = 'standard';
+          this.game.startRun('veteran', 'pulse', 'dash', 'interceptor', 'standard');
+          break;
         case 'start-run': this.game.startRun(this.difficulty, this.selectedWeapon, this.selectedAbility, this.game.save.data.selectedShip, this.selectedMode); break;
         case 'start-training': this.game.startRun(this.difficulty, this.selectedWeapon, this.selectedAbility, this.game.save.data.selectedShip, this.selectedMode, true); break;
+        case 'touch-missiles': this.game.fireSecondaryWeapon(); break;
+        case 'touch-ability': this.game.activateAbility(); break;
+        case 'touch-secondary': this.game.activateSecondaryAbility(); break;
         case 'codex': this.showCodex(); break;
         case 'close-codex': this.element('codex-modal').classList.remove('active'); break;
         case 'skip-tutorial': this.game.skipTutorial(); break;
@@ -492,6 +511,7 @@ export class UI implements GameView {
     this.game.save.updateSettings({ [key]: value });
     this.game.audio.setSettings(this.game.save.data.settings);
     if (key === 'quality') this.game.renderer.setQuality(value as QualitySetting);
+    this.updateSettings();
   }
 
   private updateSettings(): void {
@@ -502,6 +522,7 @@ export class UI implements GameView {
       if (input.type === 'checkbox') (input as HTMLInputElement).checked = Boolean(value);
       else input.value = String(value);
     }
+    document.body.classList.toggle('left-handed', settings.leftHanded);
   }
 
   private updateDifficulty(): void {
@@ -601,6 +622,7 @@ export class UI implements GameView {
         <div class="loadout-layout">
           <aside class="loadout-visual"><div id="loadout-ship-frame" class="loadout-ship-image"><img id="loadout-ship-image" src="${assetUrl('/assets/ships/interceptor.png')}" alt="Выбранный корабль"></div><h2 id="loadout-ship-name">NV–01 // INTERCEPTOR</h2><p id="loadout-ship-description"></p><div id="loadout-stats" class="loadout-stats"></div></aside>
           <main class="loadout-options">
+            <section id="quick-start" class="quick-start"><div><h3>ПЕРВЫЙ ВЫЛЕТ?</h3><p>Начните со сбалансированной сборки. Критический истребитель, ракетный Bulwark и дроны Carrier откроются позже. Все параметры ниже можно изменить.</p></div><button class="primary-button" data-action="quick-start"><span>БЫСТРЫЙ СТАРТ</span><small>INTERCEPTOR · PULSE · DASH · ВЕТЕРАН</small></button></section>
             <section class="loadout-section"><h3>КОРАБЛЬ</h3><div id="loadout-ship-grid" class="loadout-ship-grid"></div></section>
             <section class="loadout-section"><h3>ОСНОВНОЕ ОРУЖИЕ</h3><div class="loadout-choice-row">${WEAPON_LIST.map((weapon) => `<button data-weapon="${weapon.id}"><i>${icon(weapon.id, weapon.icon)}</i>${weapon.shortName}</button>`).join('')}</div><p id="loadout-weapon-description"></p></section>
             <section class="loadout-section"><h3>АКТИВНАЯ СПОСОБНОСТЬ</h3><div class="loadout-choice-row">${ABILITY_LIST.map((ability) => `<button data-ability="${ability.id}"><i>${icon(ability.id, ability.icon)}</i>${ability.shortName}</button>`).join('')}</div><p id="loadout-ability-description"></p></section>
@@ -623,6 +645,8 @@ export class UI implements GameView {
         <div id="training-hud" class="training-hud"><span>ПОЛИГОН · <b id="training-time">45 С</b></span><strong id="training-dps">0</strong><small>FACT DPS</small><div><span>ОСНОВНОЙ <b id="training-primary-dps">0</b></span><span>РАКЕТЫ <b id="training-missile-dps">0</b></span></div></div>
         <div id="tutorial-hint" class="tutorial-hint"><span id="tutorial-text"></span><button data-action="skip-tutorial" aria-label="Пропустить обучение">×</button></div>
       </div>
+
+      <div id="touch-controls" class="touch-controls" role="group" aria-label="Сенсорное управление"><button id="touch-missiles" data-action="touch-missiles" aria-label="Запустить ракеты">▲<small>РАКЕТЫ</small></button><button id="touch-ability" data-action="touch-ability" aria-label="Основная способность">Q<small id="touch-ability-label">DASH</small></button><button id="touch-secondary" data-action="touch-secondary" aria-label="Дополнительная способность" hidden>E<small id="touch-secondary-label"></small></button></div>
 
       <div id="announcement" class="announcement"><strong></strong><span></span></div>
 
@@ -647,7 +671,7 @@ export class UI implements GameView {
 
       <div id="codex-modal" class="overlay settings-modal"><div class="dialog settings-dialog challenges-dialog codex-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">АРХИВ СИНЕРГИЙ · <b id="codex-count">0 / 6</b></span><h2>КОДЕКС ЭВОЛЮЦИЙ</h2></div><button class="icon-button" data-action="close-codex" aria-label="Закрыть кодекс">×</button></div><div id="codex-grid" class="codex-grid"></div></div></div>
 
-      <div id="settings-modal" class="overlay settings-modal"><div class="dialog settings-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">СИСТЕМНАЯ КОНФИГУРАЦИЯ</span><h2>НАСТРОЙКИ</h2></div><button class="icon-button" data-action="close-settings" aria-label="Закрыть">×</button></div><label class="range-setting"><span>ОБЩАЯ ГРОМКОСТЬ</span><input type="range" min="0" max="1" step="0.05" data-setting="masterVolume"></label><label class="range-setting"><span>МУЗЫКА</span><input type="range" min="0" max="1" step="0.05" data-setting="musicVolume"></label><label class="range-setting"><span>ЭФФЕКТЫ</span><input type="range" min="0" max="1" step="0.05" data-setting="sfxVolume"></label><label class="range-setting"><span>ИНТЕНСИВНОСТЬ ЧАСТИЦ</span><input type="range" min="0" max="1" step="0.05" data-setting="particles"></label><label class="select-setting"><span>КАЧЕСТВО ЭФФЕКТОВ</span><select data-setting="quality"><option value="auto">Авто (рекомендуется)</option><option value="high">Высокое</option><option value="medium">Среднее</option><option value="low">Низкое</option></select></label><label class="toggle-setting"><span>ТРЯСКА КАМЕРЫ<small>Отзывчивость взрывов и попаданий</small></span><input type="checkbox" data-setting="screenShake"><i></i></label><label class="toggle-setting"><span>ЧИСЛА УРОНА<small>Можно отключить для чистоты экрана</small></span><input type="checkbox" data-setting="damageNumbers"><i></i></label><div class="controls-help"><span>УПРАВЛЕНИЕ</span><p><b>Мышь / WASD</b> движение · <b>ЛКМ / Space</b> blaster</p><p><b>ПКМ / Shift / R</b> ракеты · <b>Esc / P</b> пауза · <b>F3</b> FPS</p></div><button class="secondary-button fullscreen-button" data-action="fullscreen">ПОЛНЫЙ ЭКРАН</button><button class="text-button reset-button" data-action="reset">Сбросить прогресс</button><a class="credits" href="https://kenney.nl/assets/space-shooter-redux" target="_blank" rel="noreferrer">Графика и сэмплы: Kenney · CC0</a></div></div>
+      <div id="settings-modal" class="overlay settings-modal"><div class="dialog settings-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">СИСТЕМНАЯ КОНФИГУРАЦИЯ</span><h2>НАСТРОЙКИ</h2></div><button class="icon-button" data-action="close-settings" aria-label="Закрыть">×</button></div><label class="range-setting"><span>ОБЩАЯ ГРОМКОСТЬ</span><input type="range" min="0" max="1" step="0.05" data-setting="masterVolume"></label><label class="range-setting"><span>МУЗЫКА</span><input type="range" min="0" max="1" step="0.05" data-setting="musicVolume"></label><label class="range-setting"><span>ЭФФЕКТЫ</span><input type="range" min="0" max="1" step="0.05" data-setting="sfxVolume"></label><label class="range-setting"><span>ИНТЕНСИВНОСТЬ ЧАСТИЦ</span><input type="range" min="0" max="1" step="0.05" data-setting="particles"></label><label class="select-setting"><span>КАЧЕСТВО ЭФФЕКТОВ</span><select data-setting="quality"><option value="auto">Авто (рекомендуется)</option><option value="high">Высокое</option><option value="medium">Среднее</option><option value="low">Низкое</option></select></label><label class="toggle-setting"><span>ТРЯСКА КАМЕРЫ<small>Отзывчивость взрывов и попаданий</small></span><input type="checkbox" data-setting="screenShake"><i></i></label><label class="toggle-setting"><span>ЧИСЛА УРОНА<small>Можно отключить для чистоты экрана</small></span><input type="checkbox" data-setting="damageNumbers"><i></i></label><label class="toggle-setting"><span>СНИЖЕНИЕ ВСПЫШЕК<small>Ослабление ярких экранных эффектов</small></span><input type="checkbox" data-setting="reducedFlashes"><i></i></label><details class="touch-settings"><summary>МОБИЛЬНОЕ УПРАВЛЕНИЕ</summary><label class="select-setting"><span>РЕЖИМ ДВИЖЕНИЯ</span><select data-setting="touchMode"><option value="relative">Движение за пальцем</option><option value="absolute">Точно в точку касания</option></select></label><label class="range-setting"><span>ЧУВСТВИТЕЛЬНОСТЬ</span><input type="range" min="0.5" max="1.75" step="0.05" data-setting="touchSensitivity"></label><label class="range-setting"><span>СМЕЩЕНИЕ НАД ПАЛЬЦЕМ</span><input type="range" min="0" max="96" step="8" data-setting="touchOffset"></label><label class="toggle-setting"><span>КНОПКИ СЛЕВА<small>Левостороннее управление</small></span><input type="checkbox" data-setting="leftHanded"><i></i></label></details><div class="controls-help"><span>УПРАВЛЕНИЕ</span><p><b>Мышь / WASD</b> движение · <b>ЛКМ / Space</b> blaster</p><p><b>ПКМ / Shift / R</b> ракеты · <b>Esc / P</b> пауза · <b>F3</b> FPS</p></div><button class="secondary-button fullscreen-button" data-action="fullscreen">ПОЛНЫЙ ЭКРАН</button><button class="text-button reset-button" data-action="reset">Сбросить прогресс</button><a class="credits" href="https://kenney.nl/assets/space-shooter-redux" target="_blank" rel="noreferrer">Графика и сэмплы: Kenney · CC0</a></div></div>
     `;
   }
 }

@@ -17,6 +17,7 @@ export interface RunRecord {
 }
 
 export type QualitySetting = 'auto' | 'high' | 'medium' | 'low';
+export type TouchControlMode = 'absolute' | 'relative';
 
 export interface GameSettings {
   masterVolume: number;
@@ -26,6 +27,11 @@ export interface GameSettings {
   damageNumbers: boolean;
   quality: QualitySetting;
   particles: number;
+  touchMode: TouchControlMode;
+  touchSensitivity: number;
+  touchOffset: number;
+  leftHanded: boolean;
+  reducedFlashes: boolean;
 }
 
 export interface SaveData {
@@ -60,6 +66,11 @@ export const defaultSettings: GameSettings = {
   damageNumbers: true,
   quality: 'auto',
   particles: 1,
+  touchMode: 'relative',
+  touchSensitivity: 1,
+  touchOffset: 48,
+  leftHanded: false,
+  reducedFlashes: false,
 };
 
 function finite(value: unknown, fallback = 0): number {
@@ -292,6 +303,11 @@ export class SaveStore {
           damageNumbers: typeof settings.damageNumbers === 'boolean' ? settings.damageNumbers : true,
           quality: ['auto', 'high', 'medium', 'low'].includes(settings.quality ?? '') ? settings.quality! : 'auto',
           particles: Math.min(1, finite(settings.particles, defaultSettings.particles)),
+          touchMode: settings.touchMode === 'absolute' ? 'absolute' : 'relative',
+          touchSensitivity: Math.min(1.75, Math.max(0.5, finite(settings.touchSensitivity, defaultSettings.touchSensitivity))),
+          touchOffset: Math.min(96, finite(settings.touchOffset, defaultSettings.touchOffset)),
+          leftHanded: typeof settings.leftHanded === 'boolean' ? settings.leftHanded : false,
+          reducedFlashes: typeof settings.reducedFlashes === 'boolean' ? settings.reducedFlashes : false,
         },
         lastDifficulty: value.lastDifficulty === 'hardcore' ? 'hardcore' : 'veteran',
         unlockedShips,

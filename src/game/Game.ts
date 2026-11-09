@@ -245,6 +245,7 @@ export class Game {
     this.player.y = this.renderer.height * 0.82;
     this.input.x = this.player.x;
     this.input.y = this.player.y;
+    this.input.resetTouch();
     this.tutorialStep = !training && !this.save.data.tutorialComplete ? 0 : -1;
     this.tutorialStartX = this.player.x;
     this.tutorialStartY = this.player.y;
@@ -686,6 +687,10 @@ export class Game {
     }
     this.audio.play(this.weapon, 0.65);
     this.spawnMuzzle(this.player.x, this.player.y - 34, WEAPONS[this.weapon].color);
+  }
+
+  fireSecondaryWeapon(): void {
+    if (this.status === 'playing' && this.player.missileCooldown <= 0) this.fireMissiles();
   }
 
   private fireMissiles(): void {
@@ -1244,6 +1249,15 @@ export class Game {
     enemy.flash = 0.075;
     if (this.stats.lifeSteal > 0) this.player.hp = Math.min(this.stats.maxHp, this.player.hp + dealt * this.stats.lifeSteal);
     const denseCombat = this.enemies.items.length > 120 || this.bullets.items.length > 1200;
+    if (!denseCombat && this.effectIntensity >= 0.55) {
+      const tint = crit ? 0xffe575 : enemy.kind === 'boss' && enemy.vulnerability > 0 ? 0x79ffff : enemy.elite ? 0xffcb57 : 0x9eeaff;
+      const count = crit ? 3 : 1;
+      for (let index = 0; index < count; index += 1) {
+        const angle = enemy.id * 2.4 + index * TAU / count;
+        const speed = 110 + index * 40;
+        this.spawnParticle(enemy.x, enemy.y, 'spark', tint, crit ? 7 : 4, 0.18, Math.cos(angle) * speed, Math.sin(angle) * speed, 0.2, 0);
+      }
+    }
     if (this.save.data.settings.damageNumbers && (!denseCombat || crit) && (crit || damage >= 10 || this.effectIntensity > 0.55)) this.renderer.spawnDamage(enemy.x, enemy.y - enemy.radius * 0.5, damage, crit);
     if (this.hitSoundTimer <= 0) {
       this.audio.play('hit', 0.35);
@@ -1741,7 +1755,7 @@ export class Game {
     this.spawnParticle(x, y, 'glow', tint, 30, 0.12, 0, -30, 0.5);
   }
 
-  private spawnParticle(x: number, y: number, texture: EffectTexture, tint: number, size: number, life: number, vx: number, vy: number, endScale = 0.5): void {
+  private spawnParticle(x: number, y: number, texture: EffectTexture, tint: number, size: number, life: number, vx: number, vy: number, endScale = 0.5, spin?: number): void {
     const particle = this.particles.acquire();
     if (!particle) return;
     particle.x = x;
@@ -1756,7 +1770,7 @@ export class Game {
     particle.tint = tint;
     particle.drag = 2.5;
     particle.rotation = texture === 'spark' ? Math.atan2(vy, vx) + Math.PI * 0.5 : this.rng.range(0, TAU);
-    particle.spin = this.rng.range(-3, 3);
+    particle.spin = spin ?? this.rng.range(-3, 3);
     particle.texture = texture;
   }
 

@@ -33,7 +33,8 @@ async function bootstrap(): Promise<void> {
     console.error(error);
     return;
   }
-  const input = new Input(host);
+  renderer.setSettings(save.data.settings);
+  const input = new Input(host, save.data.settings);
   const audio = new AudioManager(save.data.settings);
   const { Game } = await import('./game/Game');
   const game = new Game(renderer, input, audio, save);
@@ -51,7 +52,11 @@ async function bootstrap(): Promise<void> {
   platform.onResume = () => game.setPlatformPause(false);
   ui.onChallengesOpen = (mode) => void platform.showLeaderboard(mode);
   ui.onFullscreen = () => void platform.toggleFullscreen();
-  save.onChange = () => platform.scheduleUpload();
+  save.onChange = () => {
+    input.setSettings(save.data.settings);
+    renderer.setSettings(save.data.settings);
+    platform.scheduleUpload();
+  };
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && game.status === 'playing') game.togglePause();
   });

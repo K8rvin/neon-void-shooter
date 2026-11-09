@@ -13,7 +13,7 @@ import {
 } from 'pixi.js';
 import { clamp, TAU } from '../core/math';
 import { assetUrl } from '../core/assets';
-import type { QualitySetting } from '../core/save';
+import type { GameSettings, QualitySetting } from '../core/save';
 import { ENEMIES } from './config/enemies';
 import { BOSS_LIST } from './config/bosses';
 import { SECTORS } from './config/sectors';
@@ -91,6 +91,7 @@ export class Renderer {
   private visualTime = 0;
   private baseResolution = 1;
   private renderScale = 1;
+  private flashScale = 1;
 
   async initialize(host: HTMLElement, quality: QualitySetting): Promise<void> {
     this.qualitySetting = quality;
@@ -299,8 +300,12 @@ export class Renderer {
     label.text.alpha = 1;
   }
 
+  setSettings(settings: GameSettings): void {
+    this.flashScale = settings.reducedFlashes ? 0.25 : 1;
+  }
+
   flash(amount: number, tint = 0xffffff): void {
-    this.flashAlpha = Math.max(this.flashAlpha, amount);
+    this.flashAlpha = Math.max(this.flashAlpha, amount * this.flashScale);
     this.flashTint = tint;
   }
 

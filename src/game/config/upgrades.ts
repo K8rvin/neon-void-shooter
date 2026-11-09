@@ -54,12 +54,12 @@ export const UPGRADES: UpgradeDefinition[] = [
   upgrade('bulletTime', 'Тактический прогноз', 'Вражеские снаряды на 10% медленнее', '◷', 'epic', 4, (s) => { s.enemyBulletSlow *= 0.9; }),
   upgrade('revive', 'Чёрный ящик', 'Один раз воскрешает с 50% корпуса и новой', '↟', 'legendary', 1, (s, p) => { s.revives += 1; p.revives += 1; }),
 
-  upgrade('ionLance', 'ЭВОЛЮЦИЯ: Ионное копьё', '+75% урона, +3 пробития, крупные снаряды', '↟', 'legendary', 1, (s) => { s.ionLance = 1; s.damage *= 1.75; s.pierce += 3; s.projectileSize *= 1.45; }, { damage: 3, pierce: 3 }),
-  upgrade('novaArray', 'ЭВОЛЮЦИЯ: Решётка Нова', '+2 потока и +25% к скорострельности', '⋔', 'legendary', 1, (s) => { s.novaArray = 1; s.projectileCount += 2; s.fireRate *= 1.25; }, { multishot: 3, rapid: 3 }),
-  upgrade('stormProtocol', 'ЭВОЛЮЦИЯ: Грозовой разум', '+2 цепи; криты создают двойной разряд', 'ϟ', 'legendary', 1, (s) => { s.stormProtocol = 1; s.chain += 2; s.critChance += 0.1; }, { chain: 2, critical: 3 }),
-  upgrade('aegis', 'ЭВОЛЮЦИЯ: Эгида Прайм', '+50 щита; разрушение щита испускает нову', '◉', 'legendary', 1, (s, p) => { s.aegis = 1; s.maxShield += 50; p.shield += 50; }, { shield: 2, shieldRegen: 2 }),
-  upgrade('phantomDrones', 'ЭВОЛЮЦИЯ: Фантомный рой', '+2 дрона и +50% к их скорострельности', '◈', 'legendary', 1, (s) => { s.phantomDrones = 1; s.drones += 2; s.droneFireRate *= 1.5; }, { drones: 2, droneDamage: 2 }),
-  upgrade('rocketSwarm', 'ЭВОЛЮЦИЯ: Рой ракет', '+2 ракеты, +2 кассеты и +30% к взрыву', '▲', 'legendary', 1, (s) => { s.rocketSwarm = 1; s.missileCount += 2; s.missileCluster += 2; s.blastRadius *= 1.3; }, { missiles: 2, warheads: 2 }),
+  upgrade('ionLance', 'ЭВОЛЮЦИЯ: Ионное копьё', 'Крупные снаряды пробивают +3 цели и наносят +75% урона', '↟', 'legendary', 1, (s) => { s.ionLance = 1; s.damage *= 1.75; s.pierce += 3; s.projectileSize *= 1.45; }, { damage: 3, pierce: 3 }),
+  upgrade('novaArray', 'ЭВОЛЮЦИЯ: Решётка Нова', 'Дополнительные 2 потока покрывают сектор; темп огня +25%', '⋔', 'legendary', 1, (s) => { s.novaArray = 1; s.projectileCount += 2; s.fireRate *= 1.25; }, { multishot: 3, rapid: 3 }),
+  upgrade('stormProtocol', 'ЭВОЛЮЦИЯ: Грозовой разум', 'Криты создают двойной разряд; молния получает +2 цепи', 'ϟ', 'legendary', 1, (s) => { s.stormProtocol = 1; s.chain += 2; s.critChance += 0.1; }, { chain: 2, critical: 3 }),
+  upgrade('aegis', 'ЭВОЛЮЦИЯ: Эгида Прайм', '+50 щита; его разрушение испускает защитную нову', '◉', 'legendary', 1, (s, p) => { s.aegis = 1; s.maxShield += 50; p.shield += 50; }, { shield: 2, shieldRegen: 2 }),
+  upgrade('phantomDrones', 'ЭВОЛЮЦИЯ: Фантомный рой', 'Призывает +2 автономных дрона и ускоряет их огонь на 50%', '◈', 'legendary', 1, (s) => { s.phantomDrones = 1; s.drones += 2; s.droneFireRate *= 1.5; }, { drones: 2, droneDamage: 2 }),
+  upgrade('rocketSwarm', 'ЭВОЛЮЦИЯ: Рой ракет', '+2 ракеты; взрывы выпускают +2 осколка и на 30% шире', '▲', 'legendary', 1, (s) => { s.rocketSwarm = 1; s.missileCount += 2; s.missileCluster += 2; s.blastRadius *= 1.3; }, { missiles: 2, warheads: 2 }),
 ];
 
 export const FALLBACK_UPGRADES: UpgradeDefinition[] = [
