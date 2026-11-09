@@ -1,3 +1,4 @@
+import { assetUrl } from './assets';
 import type { GameSettings } from './save';
 
 export type SoundName =
@@ -302,7 +303,7 @@ export class AudioManager {
     await Promise.all(Object.entries(SAMPLE_PATHS).map(async ([name, path]) => {
       if (!path) return;
       try {
-        const response = await fetch(path);
+        const response = await fetch(assetUrl(path));
         if (!response.ok) return;
         const buffer = await context.decodeAudioData(await response.arrayBuffer());
         this.samples.set(name as SoundName, buffer);

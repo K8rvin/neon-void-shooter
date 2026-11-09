@@ -1,4 +1,5 @@
 import { formatNumber, formatTime } from '../core/math';
+import { assetUrl } from '../core/assets';
 import type { QualitySetting } from '../core/save';
 import { createBaseStats, META_UPGRADES, metaCost } from '../game/config/meta';
 import { getBuildAnalytics } from '../game/analysis';
@@ -98,7 +99,7 @@ export class UI implements GameView {
     augmentById(save.selectedAugments[ship.id])?.apply(stats);
     const analytics = getBuildAnalytics(stats, this.selectedWeapon, 0, 1);
     const mastery = masteryProgress(save.shipMastery[ship.id]?.xp ?? 0);
-    (this.element('loadout-ship-image') as HTMLImageElement).src = ship.image;
+    (this.element('loadout-ship-image') as HTMLImageElement).src = assetUrl(ship.image);
     this.element('loadout-ship-frame').className = `loadout-ship-image mastery-${mastery.level}`;
     this.element('loadout-ship-name').textContent = `${ship.code} // ${ship.name}`;
     this.element('loadout-ship-description').textContent = ship.description;
@@ -117,7 +118,7 @@ export class UI implements GameView {
       const selected = save.selectedShip === definition.id;
       const disabled = !unlocked && save.cores < definition.unlockCost;
       const level = masteryProgress(save.shipMastery[definition.id]?.xp ?? 0).level;
-      return `<button class="loadout-ship-card${selected ? ' selected' : ''}" data-ship="${definition.id}" ${disabled ? 'disabled' : ''}><img class="ship-card-thumb" src="${definition.image}" alt="" loading="lazy"><strong>${definition.name}</strong><span>${selected ? 'ВЫБРАН' : unlocked ? 'ВЫБРАТЬ' : `${definition.unlockWave} ВОЛНА / ◆ ${definition.unlockCost}`}</span><small>MK ${level}</small></button>`;
+      return `<button class="loadout-ship-card${selected ? ' selected' : ''}" data-ship="${definition.id}" ${disabled ? 'disabled' : ''}><img class="ship-card-thumb" src="${assetUrl(definition.image)}" alt="" loading="lazy"><strong>${definition.name}</strong><span>${selected ? 'ВЫБРАН' : unlocked ? 'ВЫБРАТЬ' : `${definition.unlockWave} ВОЛНА / ◆ ${definition.unlockCost}`}</span><small>MK ${level}</small></button>`;
     }).join('');
     this.element('loadout-mastery').innerHTML = `
       <div class="mastery-heading"><span>МАСТЕРСТВО ${mastery.level} · ${save.shipMastery[ship.id]?.xp ?? 0} XP</span><b>${mastery.next === undefined ? 'МАКСИМУМ' : `${mastery.remaining} XP ДО УРОВНЯ ${mastery.level + 1}`}</b></div>
@@ -206,7 +207,7 @@ export class UI implements GameView {
     const mastery = masteryProgress(this.game.save.data.shipMastery[summary.ship]?.xp ?? 0);
     this.element('result-eyebrow').textContent = `${ship.code} // ${summary.training ? 'ПОЛИГОН' : summary.deathCause ? 'СИГНАЛ ПОТЕРЯН' : 'ЖУРНАЛ ЗАБЕГА'}`;
     this.element('result-title').innerHTML = summary.training ? 'ПОЛИГОН<br><span>ЗАВЕРШЁН</span>' : summary.deathCause ? 'КОРАБЛЬ<br><span>УНИЧТОЖЕН</span>' : 'ЗАБЕГ<br><span>ЗАВЕРШЁН</span>';
-    (this.element('result-ship-image') as HTMLImageElement).src = ship.image;
+    (this.element('result-ship-image') as HTMLImageElement).src = assetUrl(ship.image);
     this.element('result-ship-frame').className = `result-ship mastery-${mastery.level}`;
     this.element('result-ship-name').textContent = `${ship.code} // ${ship.name}`;
     this.element('result-loadout').textContent = `${WEAPONS[summary.weapon].shortName} · ${ABILITIES[summary.ability].shortName}${augmentById(this.game.save.data.selectedAugments[summary.ship]) ? ` · ${augmentById(this.game.save.data.selectedAugments[summary.ship])!.name}` : ''}`;
@@ -308,7 +309,7 @@ export class UI implements GameView {
     const ship = SHIPS[save.selectedShip];
     const mastery = masteryProgress(save.shipMastery[ship.id]?.xp ?? 0);
     this.element('hangar-cores').textContent = formatNumber(save.cores);
-    (this.element('selected-ship-image') as HTMLImageElement).src = ship.image;
+    (this.element('selected-ship-image') as HTMLImageElement).src = assetUrl(ship.image);
     this.element('selected-ship-frame').className = `hangar-ship-image mastery-${mastery.level}`;
     this.element('selected-ship-name').textContent = `${ship.code} // ${ship.name}`;
     this.element('selected-ship-description').textContent = ship.description;
@@ -321,7 +322,7 @@ export class UI implements GameView {
       const selected = save.selectedShip === definition.id;
       const disabled = !unlocked && save.cores < definition.unlockCost;
       const level = masteryProgress(save.shipMastery[definition.id]?.xp ?? 0).level;
-      return `<button class="ship-card${selected ? ' selected' : ''}" data-ship="${definition.id}" ${disabled ? 'disabled' : ''}><img class="ship-card-thumb" src="${definition.image}" alt="" loading="lazy"><strong>${definition.name}</strong><span>${selected ? 'ВЫБРАН' : unlocked ? 'ВЫБРАТЬ' : `${definition.unlockWave} ВОЛНА / ◆ ${definition.unlockCost}`}</span><small>MK ${level}</small></button>`;
+      return `<button class="ship-card${selected ? ' selected' : ''}" data-ship="${definition.id}" ${disabled ? 'disabled' : ''}><img class="ship-card-thumb" src="${assetUrl(definition.image)}" alt="" loading="lazy"><strong>${definition.name}</strong><span>${selected ? 'ВЫБРАН' : unlocked ? 'ВЫБРАТЬ' : `${definition.unlockWave} ВОЛНА / ◆ ${definition.unlockCost}`}</span><small>MK ${level}</small></button>`;
     }).join('');
     this.element('hangar-stats').innerHTML = [
       ['КОРПУС', Math.round(stats.maxHp).toString()],
@@ -585,20 +586,20 @@ export class UI implements GameView {
             <div class="hero-actions"><button class="primary-button" data-action="start"><span>НАЧАТЬ ЗАБЕГ</span><b>↗</b></button><button class="secondary-button" data-action="hangar">АНГАР <span>→</span></button></div>
             <div class="menu-records"><div><span>ЛУЧШИЙ СЧЁТ</span><strong id="menu-best">0</strong></div><div><span>МАКС. ВОЛНА</span><strong id="menu-wave">0</strong></div><div><span>ЗАБЕГОВ</span><strong id="menu-runs">0</strong></div></div>
           </div>
-          <div class="hero-visual" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="ship-halo"></div><img src="/assets/ships/interceptor.png" alt=""><span class="ship-label">NV–01 // ИСТРЕБИТЕЛЬ</span><div class="vertical-label">DEEP SPACE COMBAT SYSTEM</div></div>
+          <div class="hero-visual" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="ship-halo"></div><img src="${assetUrl('/assets/ships/interceptor.png')}" alt=""><span class="ship-label">NV–01 // ИСТРЕБИТЕЛЬ</span><div class="vertical-label">DEEP SPACE COMBAT SYSTEM</div></div>
         </div>
         <footer class="menu-footer"><span>40+ УЛУЧШЕНИЙ</span><i></i><span>БЕСКОНЕЧНАЯ ПРОКАЧКА</span><i></i><span>WEBGL 2.0</span><div class="control-hint"><b>ЛКМ</b> BLASTER <b>ПКМ</b> РАКЕТЫ <b>МЫШЬ</b> ДВИЖЕНИЕ</div></footer>
       </section>
 
       <section class="screen hangar-screen" data-screen="hangar">
         <header class="panel-nav"><button class="back-button" data-action="menu">← НАЗАД</button><div><span>ПОСТОЯННАЯ МОДЕРНИЗАЦИЯ</span><h2>АНГАР</h2></div><span class="currency large">◆ <b id="hangar-cores">0</b></span></header>
-        <div class="hangar-layout"><aside class="hangar-ship"><div id="selected-ship-frame" class="hangar-ship-image"><img id="selected-ship-image" src="/assets/ships/interceptor.png" alt="Выбранный корабль"></div><h3 id="selected-ship-name">NV–01 // INTERCEPTOR</h3><p id="selected-ship-description"></p><div id="ship-grid" class="ship-grid"></div><div id="hangar-stats" class="hangar-stats"></div><div id="hangar-mastery" class="hangar-mastery"></div><button class="primary-button compact" data-action="start">В БОЙ <b>↗</b></button></aside><main class="meta-main"><div class="section-heading"><div><span>КОРАБЕЛЬНЫЕ СИСТЕМЫ</span><h3>Модули корабля</h3></div><span>12 МОДУЛЕЙ · ∞ УРОВНЕЙ</span></div><div id="meta-grid" class="meta-grid"></div></main></div>
+        <div class="hangar-layout"><aside class="hangar-ship"><div id="selected-ship-frame" class="hangar-ship-image"><img id="selected-ship-image" src="${assetUrl('/assets/ships/interceptor.png')}" alt="Выбранный корабль"></div><h3 id="selected-ship-name">NV–01 // INTERCEPTOR</h3><p id="selected-ship-description"></p><div id="ship-grid" class="ship-grid"></div><div id="hangar-stats" class="hangar-stats"></div><div id="hangar-mastery" class="hangar-mastery"></div><button class="primary-button compact" data-action="start">В БОЙ <b>↗</b></button></aside><main class="meta-main"><div class="section-heading"><div><span>КОРАБЕЛЬНЫЕ СИСТЕМЫ</span><h3>Модули корабля</h3></div><span>12 МОДУЛЕЙ · ∞ УРОВНЕЙ</span></div><div id="meta-grid" class="meta-grid"></div></main></div>
       </section>
 
       <section class="screen loadout-screen" data-screen="loadout">
         <header class="panel-nav"><button class="back-button" data-action="menu">← НАЗАД</button><div><span>ПОДГОТОВКА К МИССИИ</span><h2>КОМПЛЕКТАЦИЯ</h2></div><span class="currency large">◆ <b id="loadout-cores">0</b></span></header>
         <div class="loadout-layout">
-          <aside class="loadout-visual"><div id="loadout-ship-frame" class="loadout-ship-image"><img id="loadout-ship-image" src="/assets/ships/interceptor.png" alt="Выбранный корабль"></div><h2 id="loadout-ship-name">NV–01 // INTERCEPTOR</h2><p id="loadout-ship-description"></p><div id="loadout-stats" class="loadout-stats"></div></aside>
+          <aside class="loadout-visual"><div id="loadout-ship-frame" class="loadout-ship-image"><img id="loadout-ship-image" src="${assetUrl('/assets/ships/interceptor.png')}" alt="Выбранный корабль"></div><h2 id="loadout-ship-name">NV–01 // INTERCEPTOR</h2><p id="loadout-ship-description"></p><div id="loadout-stats" class="loadout-stats"></div></aside>
           <main class="loadout-options">
             <section class="loadout-section"><h3>КОРАБЛЬ</h3><div id="loadout-ship-grid" class="loadout-ship-grid"></div></section>
             <section class="loadout-section"><h3>ОСНОВНОЕ ОРУЖИЕ</h3><div class="loadout-choice-row">${WEAPON_LIST.map((weapon) => `<button data-weapon="${weapon.id}"><i>${icon(weapon.id, weapon.icon)}</i>${weapon.shortName}</button>`).join('')}</div><p id="loadout-weapon-description"></p></section>
@@ -633,7 +634,7 @@ export class UI implements GameView {
 
       <section class="screen gameover-screen" data-screen="gameover"><div class="gameover-panel">
         <span id="result-eyebrow" class="dialog-eyebrow">NV–01 // ЖУРНАЛ ЗАБЕГА</span>
-        <div class="result-top"><div><h2 id="result-title">ЗАБЕГ<br><span>ЗАВЕРШЁН</span></h2><div class="result-score"><span>ИТОГОВЫЙ СЧЁТ</span><strong id="result-score">0</strong><b id="result-difficulty"></b></div></div><div id="result-ship-frame" class="result-ship"><img id="result-ship-image" src="/assets/ships/interceptor.png" alt="Корабль забега"><strong id="result-ship-name"></strong><span id="result-loadout"></span></div></div>
+        <div class="result-top"><div><h2 id="result-title">ЗАБЕГ<br><span>ЗАВЕРШЁН</span></h2><div class="result-score"><span>ИТОГОВЫЙ СЧЁТ</span><strong id="result-score">0</strong><b id="result-difficulty"></b></div></div><div id="result-ship-frame" class="result-ship"><img id="result-ship-image" src="${assetUrl('/assets/ships/interceptor.png')}" alt="Корабль забега"><strong id="result-ship-name"></strong><span id="result-loadout"></span></div></div>
         <div class="result-grid"><div><span>ВОЛНА</span><b id="result-wave"></b></div><div><span>УНИЧТОЖЕНО</span><b id="result-kills"></b></div><div><span>ВРЕМЯ</span><b id="result-time"></b></div><div><span>УРОВЕНЬ</span><b id="result-level"></b></div></div>
         <div class="cores-earned"><span id="result-cores-label">ЯДРА СОХРАНЕНЫ</span><strong id="result-cores">+0</strong></div>
         <div class="result-analysis"><section class="result-panel"><h3>УРОН ПО ИСТОЧНИКАМ</h3><div id="result-damage"></div><div id="result-synergy" class="result-synergy"></div></section><section class="result-panel"><h3>ИТОГ ЗАБЕГА</h3><div id="result-death" class="result-death"></div><div id="result-mastery" class="result-mastery"></div></section></div>

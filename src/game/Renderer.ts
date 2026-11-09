@@ -12,6 +12,7 @@ import {
   TilingSprite,
 } from 'pixi.js';
 import { clamp, TAU } from '../core/math';
+import { assetUrl } from '../core/assets';
 import type { QualitySetting } from '../core/save';
 import { ENEMIES } from './config/enemies';
 import { BOSS_LIST } from './config/bosses';
@@ -106,8 +107,8 @@ export class Renderer {
     });
     host.appendChild(this.app.canvas);
     this.app.canvas.setAttribute('aria-label', 'Космический бой');
-    this.sheet = await Assets.load<Spritesheet>('/assets/atlas.json');
-    this.combatSheet = await Assets.load<Spritesheet>('/assets/combat-atlas.json').catch(() => undefined);
+    this.sheet = await Assets.load<Spritesheet>(assetUrl('/assets/atlas.json'));
+    this.combatSheet = await Assets.load<Spritesheet>(assetUrl('/assets/combat-atlas.json')).catch(() => undefined);
     this.createTextures();
     this.createScene();
     this.resize();
