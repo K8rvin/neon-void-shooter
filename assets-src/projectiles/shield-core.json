@@ -1,0 +1,14 @@
+{
+  "id": "shield-core",
+  "method": "Original procedural vector-like shapes and gradients; no external image",
+  "purpose": "Голубое уязвимое ядро с кольцом",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\projectiles\\shield-core.png",
+  "originalFormat": "PNG",
+  "originalSize": [
+    128,
+    128
+  ],
+  "processing": "RGBA, premultiplied-alpha LANCZOS downsampling, transparent margins, no upscaling, no runtime blur",
+  "atlas": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\evolution-atlas.png",
+  "visualCheck": "Проверено на тёмном и светлом фоне: контур читается, прозрачные поля сохранены, обрезки нет."
+}

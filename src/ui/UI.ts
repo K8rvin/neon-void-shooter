@@ -210,7 +210,7 @@ export class UI implements GameView {
     this.element('result-eyebrow').textContent = `${ship.code} // ${summary.training ? 'ПОЛИГОН' : summary.deathCause ? 'СИГНАЛ ПОТЕРЯН' : 'ЖУРНАЛ ЗАБЕГА'}`;
     this.element('result-title').innerHTML = summary.training ? 'ПОЛИГОН<br><span>ЗАВЕРШЁН</span>' : summary.victory ? 'СЕРИЯ<br><span>ПОБЕДА</span>' : summary.deathCause ? 'КОРАБЛЬ<br><span>УНИЧТОЖЕН</span>' : 'ЗАБЕГ<br><span>ЗАВЕРШЁН</span>';
     (this.element('result-ship-image') as HTMLImageElement).src = assetUrl(ship.image);
-    this.element('result-ship-frame').className = `result-ship mastery-${mastery.level}`;
+    this.element('result-ship-frame').className = `result-ship mastery-${mastery.level}${summary.victory || summary.evolutions >= 2 ? ' rare-build' : ''}`;
     this.element('result-ship-name').textContent = `${ship.code} // ${ship.name}`;
     this.element('result-loadout').textContent = `${WEAPONS[summary.weapon].shortName} · ${ABILITIES[summary.ability].shortName}${augmentById(this.game.save.data.selectedAugments[summary.ship]) ? ` · ${augmentById(this.game.save.data.selectedAugments[summary.ship])!.name}` : ''}`;
     this.element('result-score').textContent = formatNumber(summary.score);
@@ -582,7 +582,7 @@ export class UI implements GameView {
 
   private updateChallenges(): void {
     for (const button of this.root.querySelectorAll<HTMLElement>('[data-mode]')) button.classList.toggle('selected', button.dataset.mode === this.selectedMode);
-    this.element('mode-grid').innerHTML = RUN_MODE_LIST.map((mode) => `<button class="mode-card${mode.id === this.selectedMode ? ' selected' : ''}" data-mode="${mode.id}"><strong>${mode.name}</strong><span>${mode.description}</span><b>ОЧКИ ×${mode.scoreMultiplier}</b></button>`).join('');
+    this.element('mode-grid').innerHTML = RUN_MODE_LIST.map((mode) => `<button class="mode-card${mode.id === this.selectedMode ? ' selected' : ''}" data-mode="${mode.id}"><i class="mode-emblem">${icon(mode.id)}</i><strong>${mode.name}</strong><span>${mode.description}</span><b>ОЧКИ ×${mode.scoreMultiplier}</b></button>`).join('');
     const records = Object.entries(this.game.save.data.modeRecords).sort(([, a], [, b]) => b.score - a.score).slice(0, 6);
     this.element('records-list').innerHTML = records.length > 0
       ? records.map(([key, record]) => `<div><span>${key.startsWith('daily:') ? `DAILY ${record.seed}` : RUN_MODES[record.mode].name}</span><strong>${formatNumber(record.score)}</strong><b>ВОЛНА ${record.wave}</b></div>`).join('')

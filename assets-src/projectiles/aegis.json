@@ -1,0 +1,14 @@
+{
+  "id": "aegis",
+  "method": "Original procedural vector-like shapes and gradients; no external image",
+  "purpose": "Шестиугольное светящееся кольцо Эгиды",
+  "original": "C:\\Projects\\YandexGames\\space-shooter\\assets-src\\projectiles\\aegis.png",
+  "originalFormat": "PNG",
+  "originalSize": [
+    128,
+    128
+  ],
+  "processing": "RGBA, premultiplied-alpha LANCZOS downsampling, transparent margins, no upscaling, no runtime blur",
+  "atlas": "C:\\Projects\\YandexGames\\space-shooter\\public\\assets\\evolution-atlas.png",
+  "visualCheck": "Проверено на тёмном и светлом фоне: контур читается, прозрачные поля сохранены, обрезки нет."
+}

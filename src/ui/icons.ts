@@ -22,6 +22,8 @@ const PATHS: Record<string, string> = {
   aegis: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6z"/><path d="m12 6 1.7 4.3L18 12l-4.3 1.7L12 18l-1.7-4.3L6 12l4.3-1.7z"/>',
   phantomDrones: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 4"/><path d="m3 12 3-3M18 15l3-3"/>',
   rocketSwarm: '<path d="m7 14 3 4v4H6v-4zM15 14l3 4v4h-4v-4zM10 2l2-1 2 1v12h-4zM7 6v6M17 6v6"/>',
+  bossRush: '<path d="m12 3 3 3 4-1 1 4 3 3-3 3-1 4-4-1-3 3-3-3-4 1-1-4-3-3 3-3 1-4 4 1z"/><path d="M8 10h8M9 10v4h6v-4M10 14v3M14 14v3M10 7l-2-3M14 7l2-3"/>',
+  blitz: '<path d="M4 5h16v14H4zM4 9h16M8 3v4M16 3v4"/><path d="m13 10-4 5h3l-1 4 4-5h-3z"/>',
   damage: '<path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/>',
   hull: '<path d="m12 2 9 5v10l-9 5-9-5V7z"/><path d="m12 6 5 3v6l-5 3-5-3V9z"/>',
   rapid: '<path d="M3 8c3-4 6 4 9 0s6 4 9 0M3 16c3-4 6 4 9 0s6 4 9 0"/>',

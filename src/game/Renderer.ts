@@ -53,6 +53,7 @@ export class Renderer {
   effectQuality = 1;
   private sheet!: Spritesheet;
   private combatSheet?: Spritesheet;
+  private evolutionSheet?: Spritesheet;
   private readonly missingTextureKeys = new Set<string>();
   private readonly world = new Container();
   private readonly enemyLayer = new Container();
@@ -79,7 +80,9 @@ export class Renderer {
   private player!: Sprite;
   private playerGlow!: Sprite;
   private engineGlow!: Sprite;
+  private engineTrail!: Sprite;
   private shield!: Sprite;
+  private aegisRing!: Sprite;
   private starLayer!: ParticleContainer;
   private readonly stars: Star[] = [];
   private readonly droneViews: Sprite[] = [];
@@ -111,6 +114,7 @@ export class Renderer {
     this.app.canvas.setAttribute('aria-label', 'Космический бой');
     this.sheet = await Assets.load<Spritesheet>(assetUrl('/assets/atlas.json'));
     this.combatSheet = await Assets.load<Spritesheet>(assetUrl('/assets/combat-atlas.json')).catch(() => undefined);
+    this.evolutionSheet = await Assets.load<Spritesheet>(assetUrl('/assets/evolution-atlas.json')).then((sheet) => sheet instanceof Spritesheet ? sheet : undefined).catch(() => undefined);
     this.createTextures();
     this.createScene();
     this.resize();
@@ -236,11 +240,22 @@ export class Renderer {
     this.engineGlow.position.set(game.player.x, game.player.y + 35);
     this.engineGlow.scale.set(0.55 + Math.sin(this.visualTime * 28) * 0.12, 0.8 + Math.sin(this.visualTime * 23) * 0.15);
     this.engineGlow.alpha = 0.75;
+    this.engineTrail.visible = masteryTrail && this.player.visible && Boolean(this.evolutionSheet) && this.effectQuality > 0.5;
+    this.engineTrail.position.set(game.player.x, game.player.y + 62);
+    this.engineTrail.rotation = this.player.rotation;
+    this.engineTrail.scale.set(0.48 + Math.sin(this.visualTime * 21) * 0.018, 0.54 + Math.sin(this.visualTime * 27) * 0.055);
+    this.engineTrail.tint = 0xffd568;
+    this.engineTrail.alpha = 0.52;
     this.shield.visible = this.player.visible && game.player.shield > 0;
     this.shield.position.set(game.player.x, game.player.y);
     this.shield.rotation += dt * 0.35;
     this.shield.alpha = 0.25 + 0.25 * clamp(game.player.shield / Math.max(1, game.stats.maxShield), 0, 1);
     this.shield.scale.set(0.7 + Math.sin(this.visualTime * 4) * 0.012);
+    this.aegisRing.visible = this.player.visible && game.stats.aegis > 0 && game.player.shield > 0 && Boolean(this.evolutionSheet);
+    this.aegisRing.position.set(game.player.x, game.player.y);
+    this.aegisRing.rotation += dt * 0.22;
+    this.aegisRing.alpha = 0.28 + 0.18 * clamp(game.player.shield / Math.max(1, game.stats.maxShield), 0, 1);
+    this.aegisRing.scale.set(0.82 + Math.sin(this.visualTime * 3) * 0.018);
     this.syncDrones(game);
     this.syncEnemies(game);
     this.syncBullets(game.bullets.items);
@@ -269,6 +284,7 @@ export class Renderer {
 
   releaseEnemy(enemy: Enemy): void {
     if (enemy.view) enemy.view.visible = false;
+    if (enemy.coreView) enemy.coreView.visible = false;
   }
 
   releasePickup(pickup: Pickup): void {
@@ -337,7 +353,6 @@ export class Renderer {
     this.starLayer = new ParticleContainer({ dynamicProperties: { position: true, rotation: false, color: false, vertex: false, uvs: false } });
     this.app.stage.addChild(this.starLayer);
     this.app.stage.addChild(this.world);
-    this.world.addChild(this.telegraphs);
     this.world.addChild(this.pickupLayer);
     this.world.addChild(this.enemyLayer);
     this.world.addChild(this.healthBars);
@@ -352,13 +367,16 @@ export class Renderer {
       this.effectLayers.set(texture, layer);
       this.world.addChild(layer);
     }
-    this.world.addChild(this.lightning);
-    this.world.addChild(this.droneLayer);
     this.playerGlow = new Sprite(this.effectTextures.get('glow'));
     this.playerGlow.anchor.set(0.5);
     this.playerGlow.tint = 0x25cfff;
     this.playerGlow.blendMode = 'add';
     this.world.addChild(this.playerGlow);
+    this.engineTrail = new Sprite(this.evolutionSheet?.textures['engine-trail.png']);
+    this.engineTrail.anchor.set(0.5);
+    this.engineTrail.blendMode = 'add';
+    this.engineTrail.visible = false;
+    this.world.addChild(this.engineTrail);
     this.engineGlow = new Sprite(this.effectTextures.get('glow'));
     this.engineGlow.anchor.set(0.5);
     this.engineGlow.tint = 0x4dffff;
@@ -372,6 +390,14 @@ export class Renderer {
     this.shield.tint = 0x6fffff;
     this.shield.blendMode = 'add';
     this.world.addChild(this.shield);
+    this.aegisRing = new Sprite(this.evolutionSheet?.textures['evolution-aegis.png']);
+    this.aegisRing.anchor.set(0.5);
+    this.aegisRing.blendMode = 'add';
+    this.aegisRing.visible = false;
+    this.world.addChild(this.aegisRing);
+    this.world.addChild(this.lightning);
+    this.world.addChild(this.telegraphs);
+    this.world.addChild(this.droneLayer);
     for (let index = 0; index < 64; index += 1) {
       const text = new Text({ text: '', style: { fontFamily: 'Kenney, Segoe UI, sans-serif', fontSize: 13, fontWeight: 'bold', fill: '#d7f8ff', stroke: { color: '#020510', width: 3 } } });
       text.anchor.set(0.5);
@@ -424,6 +450,23 @@ export class Renderer {
       const scale = boss ? boss.renderSize / texture.width * pulse : hasCombatTexture ? (config.combatSize ?? 80) / texture.width : config.scale;
       view.scale.set(scale * enemy.scale);
       const exposed = boss && (boss.mechanic === 'weakpoint' || boss.mechanic === 'omegaBeams') && enemy.vulnerability > 0;
+      const coreTexture = exposed ? this.evolutionSheet?.textures['shield-core.png'] : undefined;
+      if (boss && coreTexture) {
+        let core = enemy.coreView;
+        if (!core) {
+          core = new Sprite(coreTexture);
+          core.anchor.set(0.5);
+          enemy.coreView = core;
+          view.addChild(core);
+        }
+        if (!core.parent) view.addChild(core);
+        core.visible = true;
+        core.rotation = -view.rotation + enemy.age * 0.65;
+        core.scale.set(boss.renderSize * 0.38 / coreTexture.width / view.scale.x);
+        core.alpha = 0.9;
+      } else if (enemy.coreView) {
+        enemy.coreView.visible = false;
+      }
       view.tint = enemy.flash > 0 ? 0xffffff : exposed ? 0x8fffff : boss ? boss.tint : enemy.elite && !eliteTexture ? 0xffd89a : config.tint;
       view.alpha = enemy.y < -20 ? 0.65 : 1;
     }
@@ -437,17 +480,20 @@ export class Renderer {
         bullet.view = view;
       }
       if (!bullet.viewAdded) {
-        view.texture = this.texture(this.bulletTexture(bullet));
-        const scale = bullet.kind === 'missile' ? bullet.size * 0.82 : bullet.kind === 'orb' ? bullet.size * 0.62 : bullet.size * 0.72;
+        const skinTexture = bullet.skin ? this.evolutionSheet?.textures[`evolution-${bullet.skin}.png`] : undefined;
+        view.texture = skinTexture ?? this.texture(this.bulletTexture(bullet));
+        const scale = skinTexture
+          ? bullet.size * (bullet.kind === 'missile' ? 0.38 : bullet.kind === 'orb' ? 0.28 : 0.32)
+          : bullet.size * (bullet.kind === 'missile' ? 0.82 : bullet.kind === 'orb' ? 0.62 : 0.72);
         view.scaleX = scale;
         view.scaleY = scale;
+        view.tint = skinTexture ? 0xffffff : bullet.tint;
         this.bulletLayer.addParticle(view);
         bullet.viewAdded = true;
       }
       view.x = bullet.x;
       view.y = bullet.y;
       view.rotation = Math.atan2(bullet.vy, bullet.vx) + Math.PI * 0.5;
-      view.tint = bullet.tint;
       view.alpha = clamp(bullet.life * 5, 0, 1);
     }
   }

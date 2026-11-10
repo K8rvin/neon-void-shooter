@@ -3,6 +3,7 @@ import type { RunMode } from './config/modes';
 import type { WeaponId } from './config/weapons';
 import type { AbilityId } from './config/abilities';
 import type { ShipId } from './config/ships';
+import type { EvolutionSkin } from './config/projectiles';
 
 export type GameStatus = 'menu' | 'loadout' | 'playing' | 'levelup' | 'route' | 'paused' | 'gameover' | 'hangar';
 export type Difficulty = 'veteran' | 'hardcore';
@@ -126,6 +127,7 @@ export interface Enemy {
   squadId: number;
   squadRole?: 'leader' | 'support';
   view?: Sprite;
+  coreView?: Sprite;
 }
 
 export interface LaserWall {
@@ -210,6 +212,7 @@ export interface Bullet {
   turnRate: number;
   size: number;
   tint: number;
+  skin?: EvolutionSkin;
   hit: Set<number>;
   view?: Particle;
   viewAdded: boolean;

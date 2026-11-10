@@ -17,6 +17,7 @@ import { BOSS_LIST } from './config/bosses';
 import { augmentById, runMasteryXp } from './config/mastery';
 import type { ShipAugmentId } from './config/mastery';
 import { createBaseStats, META_UPGRADES, metaCost } from './config/meta';
+import { evolutionSkin } from './config/projectiles';
 import { FALLBACK_UPGRADES, UPGRADE_MAP, UPGRADES } from './config/upgrades';
 import { ROUTE_SECTORS, SECTORS } from './config/sectors';
 import type { SectorDefinition, SectorId } from './config/sectors';
@@ -1972,6 +1973,7 @@ export class Game {
     bullet.id = this.nextId++;
     bullet.owner = owner;
     bullet.kind = kind;
+    bullet.skin = evolutionSkin(this.stats, owner, kind);
     bullet.damageSource = owner === 'drone' ? 'drone' : kind === 'missile' ? 'missile' : kind === 'shard' ? 'shrapnel' : 'primary';
     bullet.sourceEnemy = undefined;
     bullet.portalCooldown = 0;
