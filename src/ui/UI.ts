@@ -207,7 +207,7 @@ export class UI implements GameView {
     const ship = SHIPS[summary.ship];
     const mastery = masteryProgress(this.game.save.data.shipMastery[summary.ship]?.xp ?? 0);
     this.element('result-eyebrow').textContent = `${ship.code} // ${summary.training ? 'ПОЛИГОН' : summary.deathCause ? 'СИГНАЛ ПОТЕРЯН' : 'ЖУРНАЛ ЗАБЕГА'}`;
-    this.element('result-title').innerHTML = summary.training ? 'ПОЛИГОН<br><span>ЗАВЕРШЁН</span>' : summary.deathCause ? 'КОРАБЛЬ<br><span>УНИЧТОЖЕН</span>' : 'ЗАБЕГ<br><span>ЗАВЕРШЁН</span>';
+    this.element('result-title').innerHTML = summary.training ? 'ПОЛИГОН<br><span>ЗАВЕРШЁН</span>' : summary.victory ? 'СЕРИЯ<br><span>ПОБЕДА</span>' : summary.deathCause ? 'КОРАБЛЬ<br><span>УНИЧТОЖЕН</span>' : 'ЗАБЕГ<br><span>ЗАВЕРШЁН</span>';
     (this.element('result-ship-image') as HTMLImageElement).src = assetUrl(ship.image);
     this.element('result-ship-frame').className = `result-ship mastery-${mastery.level}`;
     this.element('result-ship-name').textContent = `${ship.code} // ${ship.name}`;
@@ -266,7 +266,7 @@ export class UI implements GameView {
     this.element('shield-text').textContent = snapshot.maxShield > 0 ? `${Math.ceil(snapshot.shield)} / ${Math.ceil(snapshot.maxShield)}` : 'НЕТ ЩИТА';
     this.element('hud-level').textContent = `${snapshot.level}`;
     this.element('hud-xp').textContent = `${Math.floor(snapshot.xp)} / ${snapshot.xpNext}`;
-    this.element('hud-wave').textContent = snapshot.training ? `ПОЛИГОН · ${Math.ceil(snapshot.trainingTime ?? 0)} С` : `ВОЛНА ${snapshot.wave} · УГРОЗА ${snapshot.threat}`;
+    this.element('hud-wave').textContent = snapshot.training ? `ПОЛИГОН · ${Math.ceil(snapshot.trainingTime ?? 0)} С` : this.game.mode === 'bossRush' ? `BOSS RUSH · ${snapshot.wave}/6` : `ВОЛНА ${snapshot.wave} · УГРОЗА ${snapshot.threat}`;
     this.element('hud-sector').textContent = `${snapshot.sectorIcon} ${snapshot.sectorName} · ${snapshot.modeName}`;
     this.element('hud-score').textContent = formatNumber(snapshot.score);
     this.element('hud-cores').textContent = formatNumber(snapshot.cores);

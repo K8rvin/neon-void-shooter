@@ -8,6 +8,7 @@ import { SpatialHash } from '../core/spatial-hash';
 import { getBuildAnalytics, previewUpgrade } from './analysis';
 import type { BuildAnalytics } from './analysis';
 import { ENEMIES, UNLOCK_WAVES } from './config/enemies';
+import { ELITE_AFFIX } from './config/affixes';
 import { BOSS_LIST } from './config/bosses';
 import { augmentById, runMasteryXp } from './config/mastery';
 import type { ShipAugmentId } from './config/mastery';
@@ -122,6 +123,10 @@ export class Game {
   view?: GameView;
   platform?: YandexPlatform;
   private platformPause = false;
+  private affixFormationTimer = 0;
+  private affixesAnnounced = false;
+  private readonly affixNearby: Enemy[] = [];
+  private runVictory = false;
 
   private readonly hash = new SpatialHash(96);
   private readonly nearby: Enemy[] = [];
@@ -235,6 +240,10 @@ export class Game {
       this.stats.maxHp = 1;
       this.stats.maxShield = 0;
       this.stats.armor = 0;
+    } else if (this.mode === 'bossRush') {
+      this.stats.damage *= 1.65;
+      this.stats.fireRate *= 1.1;
+      this.stats.missileCooldown *= 0.8;
     }
     this.player = this.createPlayer();
     this.player.radius = SHIPS[this.ship].radius;
@@ -589,6 +598,7 @@ export class Game {
     this.updateGravityBomb(dt);
     this.hash.clear();
     for (const enemy of this.enemies.items) if (enemy.active) this.hash.insert(enemy);
+    this.updateEliteAffixes(dt);
     this.updateBullets(dt);
     this.updatePickups(dt);
     this.updateEffects(dt);
@@ -751,7 +761,7 @@ export class Game {
       if (enemy.burnTime > 0) {
         enemy.burnTime -= dt;
         enemy.burnTick -= dt;
-        const burnDamage = enemy.burnDps * dt;
+        const burnDamage = enemy.burnDps * dt * (enemy.kind === 'boss' ? 1 : enemy.formationShield);
         this.trackDamage('burn', enemy.trainingTarget ? burnDamage : Math.min(enemy.hp, burnDamage));
         if (!enemy.trainingTarget) enemy.hp -= burnDamage;
         if (enemy.burnTick <= 0) {
@@ -763,7 +773,7 @@ export class Game {
           continue;
         }
       }
-      if (enemy.trainingTarget) continue;
+      if (enemy.trainingTarget || enemy.teleportTelegraph > 0) continue;
       if (enemy.kind === 'boss') this.updateBoss(enemy, dt);
       else this.updateRegularEnemy(enemy, dt);
       if (!enemy.active || this.player.hp <= 0) continue;
@@ -782,6 +792,64 @@ export class Game {
           enemy.hp -= enemy.maxHp * 0.3;
           enemy.vy = -enemy.speed;
           if (enemy.hp <= 0) this.killEnemy(enemy);
+        }
+      }
+    }
+  }
+
+  private updateEliteAffixes(dt: number): void {
+    this.affixFormationTimer -= dt;
+    const refreshFormation = this.affixFormationTimer <= 0;
+    if (refreshFormation) {
+      this.affixFormationTimer = 0.2;
+      for (const enemy of this.enemies.items) enemy.formationShield = 1;
+    }
+    for (const enemy of this.enemies.items) {
+      if (enemy.affixes === 0) continue;
+      if (enemy.affixes & ELITE_AFFIX.regeneration) {
+        enemy.affixTimer -= dt;
+        if (enemy.affixTimer <= 0) {
+          enemy.affixTimer = 1.5;
+          this.hash.query(enemy.x, enemy.y, 145, this.affixNearby);
+          for (const ally of this.affixNearby) {
+            if (ally === enemy || ally.kind === 'boss' || ally.hp >= ally.maxHp) continue;
+            ally.hp = Math.min(ally.maxHp, ally.hp + ally.maxHp * 0.03);
+          }
+        }
+      }
+      if (enemy.affixes & ELITE_AFFIX.teleport) {
+        if (enemy.teleportTelegraph > 0) {
+          enemy.teleportTelegraph = Math.max(0, enemy.teleportTelegraph - dt);
+          if (enemy.teleportTelegraph === 0) {
+            enemy.x = enemy.teleportTargetX;
+            enemy.y = enemy.teleportTargetY;
+            enemy.teleportTimer = 5 + enemy.id % 3;
+          }
+        } else {
+          enemy.teleportTimer -= dt;
+          if (enemy.teleportTimer <= 0) {
+            const direction = enemy.id % 2 === 0 ? 1 : -1;
+            let targetX = clamp(enemy.x + direction * 160, 40, this.renderer.width - 40);
+            let targetY = clamp(enemy.y + (enemy.id % 3 - 1) * 95, 90, this.renderer.height * 0.5);
+            if (distanceSquared(targetX, targetY, this.player.x, this.player.y) < 220 ** 2) {
+              targetX = this.player.x < this.renderer.width * 0.5 ? this.renderer.width - 55 : 55;
+              targetY = this.player.y < this.renderer.height * 0.5 ? this.renderer.height * 0.55 : 110;
+            }
+            if (distanceSquared(targetX, targetY, this.player.x, this.player.y) >= 220 ** 2) {
+              enemy.teleportTargetX = targetX;
+              enemy.teleportTargetY = targetY;
+              enemy.teleportTelegraph = 0.9;
+            } else {
+              enemy.teleportTimer = 1.5;
+            }
+          }
+        }
+      }
+      if (refreshFormation && (enemy.affixes & ELITE_AFFIX.formation)) {
+        this.hash.query(enemy.x, enemy.y, 170, this.affixNearby);
+        for (const ally of this.affixNearby) {
+          if (ally.kind === 'boss') continue;
+          ally.formationShield = Math.min(ally.formationShield, 0.75);
         }
       }
     }
@@ -1072,6 +1140,18 @@ export class Game {
     bullet.size = kind === 'heavy' ? 1.4 : 1;
     bullet.tint = kind === 'heavy' ? 0xffdf68 : enemy.kind === 'boss' ? 0xff4fba : enemy.elite ? 0xffbf47 : 0xff526e;
     bullet.life = 12;
+    if (enemy.elite && (enemy.affixes & ELITE_AFFIX.splitShot) !== 0) {
+      for (let side = -1; side <= 1; side += 2) {
+        const splitAngle = angle + side * 0.16;
+        const split = this.spawnBullet('enemy', kind, enemy.x, enemy.y + enemy.radius * 0.35, Math.cos(splitAngle) * adjustedSpeed, Math.sin(splitAngle) * adjustedSpeed, enemy.damage * 0.55);
+        if (!split) continue;
+        split.sourceEnemy = enemy.kind;
+        split.radius = kind === 'heavy' ? 12 : kind === 'orb' ? 8 : 7;
+        split.size = kind === 'heavy' ? 1.4 : 1;
+        split.tint = 0xffb86b;
+        split.life = 12;
+      }
+    }
   }
 
   private teleportRiftBullet(bullet: Bullet): void {
@@ -1233,7 +1313,7 @@ export class Game {
 
   private damageEnemy(enemy: Enemy, amount: number, crit: boolean, source: DamageSource = 'primary'): void {
     if (!enemy.active) return;
-    let damage = amount * this.sectorDefinition.playerDamageMultiplier;
+    let damage = amount * this.sectorDefinition.playerDamageMultiplier * enemy.formationShield;
     if (enemy.kind === 'boss') {
       if (enemy.bossVariant === 0) damage *= enemy.vulnerability > 0 ? 1.5 : 0.4;
       else if (enemy.bossVariant === 2 && this.enemies.items.some((item) => item.kind === 'generator')) damage *= 0.15;
@@ -1365,6 +1445,23 @@ export class Game {
       this.trauma = 1;
       this.renderer.flash(0.5, 0xffb8ef);
       this.view?.announce('БОСС УНИЧТОЖЕН', `Сектор ${this.wave} очищен`);
+      if (this.mode === 'bossRush') {
+        for (let index = this.enemies.items.length - 1; index >= 0; index -= 1) {
+          if (this.enemies.items[index]!.kind === 'boss') continue;
+          this.renderer.releaseEnemy(this.enemies.items[index]!);
+          this.enemies.releaseAt(index);
+        }
+        for (let index = this.bullets.items.length - 1; index >= 0; index -= 1) {
+          if (this.bullets.items[index]!.owner === 'enemy') this.releaseBulletAt(index);
+        }
+        this.cores += Math.round((6 + this.wave * 2) * this.stats.coreGain * this.sectorDefinition.coreMultiplier);
+        this.player.hp = Math.min(this.stats.maxHp, this.player.hp + this.stats.maxHp * 0.15);
+        this.player.shield = Math.min(this.stats.maxShield, this.player.shield + this.stats.maxShield * 0.5);
+        this.player.invulnerable = Math.max(this.player.invulnerable, 2);
+        this.intermission = 3;
+        this.view?.announce(this.wave >= BOSS_LIST.length ? 'СЕРИЯ ПОБЕДА' : `БОСС ${this.wave} УНИЧТОЖЕН`, this.wave >= BOSS_LIST.length ? 'Все шесть целей уничтожены' : 'Восстановление · следующий босс через 3 с');
+        return;
+      }
       const totalCores = Math.floor((24 + this.wave * 2) * (this.difficulty === 'hardcore' ? 1.5 : 1));
       for (let drop = 0; drop < 8; drop += 1) this.spawnPickup('core', x + this.rng.range(-70, 70), y + this.rng.range(-30, 40), totalCores / 8);
       this.spawnPickup('bomb', x, y, 1);
@@ -1444,7 +1541,7 @@ export class Game {
   }
 
   private gainXP(amount: number): void {
-    if (this.status !== 'playing') return;
+    if (this.mode === 'bossRush' || this.status !== 'playing') return;
     this.player.xp += amount;
     if (this.player.xp >= this.player.xpNext) {
       this.player.xp -= this.player.xpNext;
@@ -1549,6 +1646,19 @@ export class Game {
       if (this.trainingTime <= 0) this.finishRun();
       return;
     }
+    if (this.mode === 'bossRush') {
+      if (this.intermission > 0) {
+        this.intermission -= dt;
+        if (this.intermission <= 0) {
+          if (this.wave >= BOSS_LIST.length) this.finishRun(true);
+          else {
+            this.wave += 1;
+            this.beginWave();
+          }
+        }
+      }
+      return;
+    }
     if (this.intermission > 0) {
       this.intermission -= dt;
       if (this.intermission <= 0) {
@@ -1596,22 +1706,29 @@ export class Game {
     this.asteroidTimer = 2.5;
     this.clearBossHazards();
     this.threat = 1 + Math.floor((this.wave - 1) / 10);
-    if (this.wave % 5 === 0) {
+    if (this.wave % 5 === 0 || this.mode === 'bossRush') {
       this.bossActive = true;
-      this.routeChosen = false;
+      this.routeChosen = this.mode === 'bossRush';
       this.waveRemaining = 0;
-      this.bossAddsTimer = 4;
-      const bossIndex = Math.floor(this.wave / 5) - 1;
+      this.bossAddsTimer = this.mode === 'bossRush' ? Number.POSITIVE_INFINITY : 4;
+      const bossIndex = this.mode === 'bossRush' ? this.wave - 1 : Math.floor(this.wave / 5) - 1;
       const definition = BOSS_LIST[bossIndex % BOSS_LIST.length]!;
       this.bossName = definition.name;
       const boss = this.spawnEnemy('boss', this.renderer.width * 0.5, -120);
-      if (boss) boss.bossVariant = bossIndex % BOSS_LIST.length;
+      if (boss) {
+        boss.bossVariant = bossIndex % BOSS_LIST.length;
+        if (this.mode === 'bossRush') {
+          boss.maxHp *= 1.2 + this.wave * 0.1;
+          boss.hp = boss.maxHp;
+          boss.damage *= 0.9;
+        }
+      }
       for (const module of definition.modules ?? []) this.spawnEnemy(module.kind, this.renderer.width * module.x, module.y, false, true);
       if (definition.mechanic === 'gravityControl') {
         this.controlZone = { active: true, x: this.renderer.width * 0.5, y: this.renderer.height * 0.58, radius: 95, progress: 0, captured: 0, moveTimer: 6 };
       }
       if (definition.mechanic === 'riftPortals') this.syncRiftPairs(0);
-      this.view?.announce(`ВОЛНА ${this.wave} · ${this.bossName}`, definition.hint);
+      this.view?.announce(this.mode === 'bossRush' ? `BOSS RUSH ${this.wave}/${BOSS_LIST.length} · ${this.bossName}` : `ВОЛНА ${this.wave} · ${this.bossName}`, definition.hint);
       this.audio.play('boss');
     } else {
       this.bossActive = false;
@@ -1677,6 +1794,21 @@ export class Game {
     enemy.trainingTarget = false;
     enemy.bossVariant = 0;
     enemy.vulnerability = 0;
+    enemy.affixes = 0;
+    enemy.affixTimer = 1.5;
+    enemy.teleportTimer = 3 + enemy.id % 4;
+    enemy.teleportTelegraph = 0;
+    enemy.teleportTargetX = 0;
+    enemy.teleportTargetY = 0;
+    enemy.formationShield = 1;
+    if (elite && kind !== 'boss' && kind !== 'meteor' && kind !== 'turret' && kind !== 'generator' && !this.training && this.wave >= 4) {
+      enemy.affixes = 1 << (enemy.id % 4);
+      if (this.wave >= 15) enemy.affixes |= 1 << ((enemy.id + 1) % 4);
+      if (!this.affixesAnnounced) {
+        this.affixesAnnounced = true;
+        this.view?.announce('ОСОБАЯ ЭЛИТА', 'Крест — лечение · Контур — защита · Ромб — скачок · Вилка — разделение');
+      }
+    }
     return enemy;
   }
 
@@ -1717,6 +1849,7 @@ export class Game {
   }
 
   private spawnPickup(kind: PickupKind, x: number, y: number, value: number): void {
+    if (kind === 'xp' && this.mode === 'bossRush') return;
     if (kind === 'xp' && this.pickups.items.length >= PICKUP_CAPACITY - 5) {
       this.gainXP(value * this.stats.xpGain);
       return;
@@ -1877,12 +2010,13 @@ export class Game {
     };
   }
 
-  private finishRun(): void {
+  private finishRun(victory = false): void {
     if (this.runRecorded) return;
-    this.spawnExplosion(this.player.x, this.player.y, 0x67dfff, 3);
+    if (!victory) this.spawnExplosion(this.player.x, this.player.y, 0x67dfff, 3);
     this.trauma = 1;
-    this.renderer.flash(0.55, 0xff427c);
-    this.audio.play(this.training ? 'levelup' : 'lose');
+    this.renderer.flash(victory ? 0.35 : 0.55, victory ? 0x65eeff : 0xff427c);
+    this.runVictory = victory;
+    this.audio.play(this.training || victory ? 'levelup' : 'lose');
     this.audio.setPaused(true);
     this.status = 'gameover';
     this.input.releaseWeapons();
@@ -1931,6 +2065,7 @@ export class Game {
       damageTaken: this.damageTaken,
       evolutions,
       training: this.training,
+      victory: this.runVictory,
       ship: this.ship,
       weapon: this.weapon,
       ability: this.ability,
@@ -1965,6 +2100,9 @@ export class Game {
     this.bossActive = false;
     this.waveRemaining = 0;
     this.intermission = 0;
+    this.affixFormationTimer = 0;
+    this.affixesAnnounced = false;
+    this.runVictory = false;
   }
 
   private startStressScenario(): void {
@@ -2028,6 +2166,7 @@ export class Game {
       speed: 0, damage: 0, xp: 0, score: 0, fireTimer: 0, age: 0, phase: 0, targetY: 0,
       elite: false, scale: 1, flash: 0, slow: 1, burnTime: 0, burnDps: 0, burnTick: 0,
       bossPhase: 0, attackTimer: 0, telegraph: 0, summoned: false, trainingTarget: false, bossVariant: 0, vulnerability: 0,
+      affixes: 0, affixTimer: 1.5, teleportTimer: 3, teleportTelegraph: 0, teleportTargetX: 0, teleportTargetY: 0, formationShield: 1,
     };
   }
 

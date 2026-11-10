@@ -16,6 +16,7 @@ import { assetUrl } from '../core/assets';
 import type { GameSettings, QualitySetting } from '../core/save';
 import { ENEMIES } from './config/enemies';
 import { BOSS_LIST } from './config/bosses';
+import { ELITE_AFFIX, ELITE_AFFIX_LIST } from './config/affixes';
 import { SECTORS } from './config/sectors';
 import type { SectorId } from './config/sectors';
 import { SHIPS } from './config/ships';
@@ -480,6 +481,39 @@ export class Renderer {
     }
   }
 
+  private drawEliteAffixes(game: Game, enemy: Enemy): void {
+    if (enemy.affixes === 0) return;
+    if (enemy.teleportTelegraph > 0) {
+      this.telegraphs.moveTo(enemy.x, enemy.y).lineTo(enemy.teleportTargetX, enemy.teleportTargetY).stroke({ color: 0xc9a1ff, width: 1.5, alpha: 0.2 });
+      this.telegraphs.circle(enemy.teleportTargetX, enemy.teleportTargetY, enemy.radius + 7).stroke({ color: 0xc9a1ff, width: 2, alpha: 0.7 });
+      this.telegraphs.circle(enemy.teleportTargetX, enemy.teleportTargetY, 8).stroke({ color: 0xe2c9ff, width: 1.5, alpha: 0.65 });
+    }
+    if (enemy.formationShield < 1) this.telegraphs.circle(enemy.x, enemy.y, enemy.radius + 4).stroke({ color: 0x79cfff, width: 1.5, alpha: 0.5 });
+    if (game.enemies.items.length <= 140) {
+      if (enemy.affixes & ELITE_AFFIX.formation) this.telegraphs.circle(enemy.x, enemy.y, 170).stroke({ color: 0x79cfff, width: 1, alpha: 0.055 });
+      if ((enemy.affixes & ELITE_AFFIX.regeneration) && enemy.affixTimer < 0.3) this.telegraphs.circle(enemy.x, enemy.y, 145).stroke({ color: 0x72ffb0, width: 1.5, alpha: 0.07 });
+    }
+    if (enemy.y < 0) return;
+    const count = ELITE_AFFIX_LIST.reduce((total, affix) => total + Number((enemy.affixes & affix.flag) !== 0), 0);
+    let index = 0;
+    for (const affix of ELITE_AFFIX_LIST) {
+      if ((enemy.affixes & affix.flag) === 0) continue;
+      const x = enemy.x + (index - (count - 1) * 0.5) * 13;
+      const y = enemy.y - enemy.radius - 22;
+      if (affix.flag === ELITE_AFFIX.regeneration) {
+        this.healthBars.rect(x - 4, y - 1, 8, 2).fill({ color: affix.color, alpha: 0.9 });
+        this.healthBars.rect(x - 1, y - 4, 2, 8).fill({ color: affix.color, alpha: 0.9 });
+      } else if (affix.flag === ELITE_AFFIX.formation) {
+        this.healthBars.circle(x, y, 5).stroke({ color: affix.color, width: 1.5, alpha: 0.9 });
+      } else if (affix.flag === ELITE_AFFIX.teleport) {
+        this.healthBars.poly([x, y - 5, x - 5, y, x, y + 5, x + 5, y], true).stroke({ color: affix.color, width: 1.5, alpha: 0.9 });
+      } else {
+        this.healthBars.moveTo(x - 5, y - 4).lineTo(x, y + 4).lineTo(x + 5, y - 4).stroke({ color: affix.color, width: 1.5, alpha: 0.9 });
+      }
+      index += 1;
+    }
+  }
+
   private syncLines(game: Game): void {
     this.telegraphs.clear();
     this.healthBars.clear();
@@ -551,6 +585,7 @@ export class Renderer {
     }
     let kamikazeWarnings = 0;
     for (const enemy of game.enemies.items) {
+      this.drawEliteAffixes(game, enemy);
       if (enemy.kind === 'boss') {
         if (enemy.bossVariant === 0 || enemy.bossVariant === 5) this.telegraphs.circle(enemy.x, enemy.y, enemy.radius + 13).stroke({ color: enemy.vulnerability > 0 ? 0x65ffc2 : enemy.bossVariant === 5 ? 0xffd36a : 0xff5b9d, width: 3, alpha: 0.55 });
         if (enemy.bossVariant === 2) {

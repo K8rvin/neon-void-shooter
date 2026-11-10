@@ -116,6 +116,13 @@ export interface Enemy {
   trainingTarget: boolean;
   bossVariant: number;
   vulnerability: number;
+  affixes: number;
+  affixTimer: number;
+  teleportTimer: number;
+  teleportTelegraph: number;
+  teleportTargetX: number;
+  teleportTargetY: number;
+  formationShield: number;
   view?: Sprite;
 }
 
@@ -261,6 +268,7 @@ export interface RunSummary {
   damageTaken: number;
   evolutions: number;
   training: boolean;
+  victory: boolean;
   ship: ShipId;
   weapon: WeaponId;
   ability: AbilityId;

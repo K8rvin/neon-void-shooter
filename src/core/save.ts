@@ -197,6 +197,7 @@ export class SaveStore {
     this.data.bestWave = Math.max(this.data.bestWave, Math.floor(summary.wave));
     this.data.totalKills += Math.floor(summary.kills);
     this.data.runs += 1;
+    if (summary.victory) this.data.victories += 1;
     const mastery = this.data.shipMastery[summary.ship] ?? { xp: 0, kills: 0, bestWave: 0, bosses: 0 };
     mastery.xp += runMasteryXp(summary);
     mastery.kills += Math.floor(summary.kills);
@@ -246,7 +247,7 @@ export class SaveStore {
         }
       }
       const modeRecords: Record<string, RunRecord> = {};
-      const validModes: RunMode[] = ['standard', 'daily', 'rockets', 'oneHp', 'elite'];
+      const validModes: RunMode[] = ['standard', 'daily', 'rockets', 'oneHp', 'elite', 'bossRush'];
       if (value.modeRecords && typeof value.modeRecords === 'object') {
         for (const [key, record] of Object.entries(value.modeRecords)) {
           if (!record || typeof record.score !== 'number' || !Number.isFinite(record.score)) continue;
