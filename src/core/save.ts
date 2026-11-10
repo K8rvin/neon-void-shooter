@@ -247,7 +247,7 @@ export class SaveStore {
         }
       }
       const modeRecords: Record<string, RunRecord> = {};
-      const validModes: RunMode[] = ['standard', 'daily', 'rockets', 'oneHp', 'elite', 'bossRush'];
+      const validModes: RunMode[] = ['standard', 'daily', 'rockets', 'oneHp', 'elite', 'bossRush', 'blitz'];
       if (value.modeRecords && typeof value.modeRecords === 'object') {
         for (const [key, record] of Object.entries(value.modeRecords)) {
           if (!record || typeof record.score !== 'number' || !Number.isFinite(record.score)) continue;

@@ -9,6 +9,10 @@ import { getBuildAnalytics, previewUpgrade } from './analysis';
 import type { BuildAnalytics } from './analysis';
 import { ENEMIES, UNLOCK_WAVES } from './config/enemies';
 import { ELITE_AFFIX } from './config/affixes';
+import { SQUAD_LIST } from './config/squads';
+import { SPECIAL_WAVE_IDS, SPECIAL_WAVE_INFO } from './config/waves';
+import type { SpecialWaveId } from './config/waves';
+import type { SharedBuild } from '../core/share';
 import { BOSS_LIST } from './config/bosses';
 import { augmentById, runMasteryXp } from './config/mastery';
 import type { ShipAugmentId } from './config/mastery';
@@ -38,6 +42,8 @@ import type {
   EnemyKind,
   GameStatus,
   ControlZone,
+  SafeZone,
+  MovingCover,
   LaserWall,
   OmegaBeam,
   RiftPortalPair,
@@ -127,6 +133,14 @@ export class Game {
   private affixesAnnounced = false;
   private readonly affixNearby: Enemy[] = [];
   private runVictory = false;
+  readonly squadLeaders = new Map<number, Enemy>();
+  private nextSquadId = 1;
+  private readonly brokenSquads = new Set<number>();
+  specialWave?: SpecialWaveId;
+  safeZone?: SafeZone;
+  private readonly coverObjects: MovingCover[] = [];
+  private pendingBuild?: SharedBuild;
+  modeTime = 0;
 
   private readonly hash = new SpatialHash(96);
   private readonly nearby: Enemy[] = [];
@@ -203,13 +217,16 @@ export class Game {
     void this.audio.unlock();
     this.audio.play('click');
     this.clearWorld();
+    const sharedBuild = this.pendingBuild;
+    this.pendingBuild = undefined;
     this.training = training;
     this.difficulty = difficulty;
     this.weapon = weapon;
     this.ability = ability;
     this.ship = this.save.data.unlockedShips.includes(ship) ? ship : 'interceptor';
-    this.selectedAugment = this.save.data.selectedAugments[this.ship];
+    this.selectedAugment = sharedBuild?.augment ?? this.save.data.selectedAugments[this.ship];
     this.mode = mode;
+    this.modeTime = mode === 'blitz' ? 360 : 0;
     this.runSeed = mode === 'daily' ? dailySeed() : Date.now();
     this.rng.reseed(this.runSeed);
     this.threat = 1;
@@ -233,6 +250,14 @@ export class Game {
     SHIPS[this.ship].apply(this.stats);
     WEAPONS[this.weapon].apply(this.stats);
     augmentById(this.selectedAugment)?.apply(this.stats);
+    if (training && sharedBuild) {
+      for (const [id, rank] of sharedBuild.cards) {
+        const definition = UPGRADE_MAP.get(id)!;
+        for (let index = 0; index < rank; index += 1) definition.apply(this.stats, this.player);
+        this.ranks.set(id, rank);
+        this.cardHistory.push({ id, rank, wave: 1, time: 0 });
+      }
+    }
     if (this.mode === 'rockets') {
       this.stats.missileCount += 2;
       this.stats.missileCooldown *= 0.65;
@@ -244,6 +269,10 @@ export class Game {
       this.stats.damage *= 1.65;
       this.stats.fireRate *= 1.1;
       this.stats.missileCooldown *= 0.8;
+    } else if (this.mode === 'blitz') {
+      this.stats.damage *= 1.9;
+      this.stats.fireRate *= 1.15;
+      this.stats.xpGain *= 1.5;
     }
     this.player = this.createPlayer();
     this.player.radius = SHIPS[this.ship].radius;
@@ -258,12 +287,12 @@ export class Game {
     this.tutorialStep = !training && !this.save.data.tutorialComplete ? 0 : -1;
     this.tutorialStartX = this.player.x;
     this.tutorialStartY = this.player.y;
-    this.ranks.clear();
+    if (!sharedBuild) this.ranks.clear();
     this.banished.clear();
     this.droneCooldowns.length = 0;
     this.dronePositions.length = 0;
     this.wave = 1;
-    this.sector = 'void';
+    this.sector = this.mode === 'blitz' ? 'elite' : 'void';
     this.routeChosen = true;
     this.currentRoutes = [];
     this.asteroidTimer = 2.5;
@@ -282,6 +311,18 @@ export class Game {
     if (training) this.setupTraining();
     else this.beginWave();
     this.view?.showPlaying();
+  }
+
+  startSharedTraining(build: SharedBuild): void {
+    if (!this.save.data.unlockedShips.includes(build.ship)) throw new Error('Сначала откройте этот корабль');
+    if (build.augment) {
+      const definition = augmentById(build.augment);
+      const xp = this.save.data.shipMastery[build.ship]?.xp ?? 0;
+      if (!definition || definition.ship !== build.ship || xp < definition.unlockXp) throw new Error('Сначала откройте модификатор мастерства для этого корабля');
+    }
+    this.pendingBuild = build;
+    this.save.selectShip(build.ship);
+    this.startRun(this.difficulty, build.weapon, build.ability, build.ship, 'standard', true);
   }
 
   togglePause(): void {
@@ -1048,6 +1089,14 @@ export class Game {
     this.riftPairs.length = 0;
     this.omegaBeams.length = 0;
     this.controlZone = undefined;
+    this.clearSpecialWave();
+  }
+
+  private clearSpecialWave(): void {
+    for (const cover of this.coverObjects) this.renderer.releaseCover(cover);
+    this.coverObjects.length = 0;
+    this.safeZone = undefined;
+    this.specialWave = undefined;
   }
 
   private spawnLaserWall(enemy: Enemy): void {
@@ -1063,7 +1112,54 @@ export class Game {
     });
   }
 
+  private startSpecialWave(id: SpecialWaveId): void {
+    this.specialWave = id;
+    if (id === 'sanctuary') {
+      this.safeZone = { x: this.renderer.width * 0.5, y: this.renderer.height * 0.58, radius: 110, charge: 0, rewarded: false };
+    } else if (id === 'movingCover') {
+      for (let index = 0; index < 2; index += 1) {
+        const x = this.renderer.width * (index === 0 ? 0.3 : 0.7);
+        const y = this.renderer.height * (0.42 + index * 0.18);
+        this.coverObjects.push({ x, y, radius: 42, vx: index === 0 ? 110 : -110, view: this.renderer.createCover(index, x, y, 42) });
+      }
+    } else {
+      this.waveRemaining = Math.floor(this.waveRemaining * 1.35);
+      this.stats.damage *= 1.25;
+      this.spawnTimer *= 0.7;
+    }
+    this.view?.announce(SPECIAL_WAVE_INFO[id].name, SPECIAL_WAVE_INFO[id].hint);
+  }
+
+  private updateSpecialWave(dt: number): void {
+    if (this.specialWave === 'sanctuary' && this.safeZone) {
+      const zone = this.safeZone;
+      zone.x = this.renderer.width * 0.5 + Math.sin(this.elapsed * 0.65) * this.renderer.width * 0.18;
+      if (!zone.rewarded && distanceSquared(this.player.x, this.player.y, zone.x, zone.y) <= zone.radius ** 2) {
+        zone.charge = Math.min(5, zone.charge + dt);
+        if (zone.charge >= 5) {
+          zone.rewarded = true;
+          this.cores += 10;
+          this.view?.announce('СТАБИЛЬНОСТЬ УДЕРЖАНА', '+10 ядер · область остаётся активной');
+        }
+      }
+    } else if (this.specialWave === 'movingCover') {
+      for (const cover of this.coverObjects) {
+        cover.x += cover.vx * dt;
+        if (cover.x <= cover.radius) {
+          cover.x = cover.radius;
+          cover.vx = Math.abs(cover.vx);
+        } else if (cover.x >= this.renderer.width - cover.radius) {
+          cover.x = this.renderer.width - cover.radius;
+          cover.vx = -Math.abs(cover.vx);
+        }
+        cover.view?.position.set(cover.x, cover.y);
+        if (cover.view) cover.view.rotation += cover.vx * dt * 0.004;
+      }
+    }
+  }
+
   private updateArena(dt: number): void {
+    this.updateSpecialWave(dt);
     this.updateBossHazards(dt);
     for (let index = this.laserWalls.length - 1; index >= 0; index -= 1) {
       const wall = this.laserWalls[index]!;
@@ -1202,6 +1298,17 @@ export class Game {
       if (bullet.x < -100 || bullet.x > this.renderer.width + 100 || bullet.y < -130 || bullet.y > this.renderer.height + 110) {
         this.releaseBulletAt(index);
         continue;
+      }
+      if (bullet.owner === 'enemy' && this.specialWave === 'movingCover') {
+        let blocked = false;
+        for (const cover of this.coverObjects) {
+          if (distanceSquared(bullet.x, bullet.y, cover.x, cover.y) < (cover.radius + bullet.radius) ** 2) {
+            this.releaseBulletAt(index);
+            blocked = true;
+            break;
+          }
+        }
+        if (blocked) continue;
       }
       if (bullet.owner === 'enemy') {
         const radius = bullet.radius + this.player.radius;
@@ -1365,6 +1472,7 @@ export class Game {
   private damagePlayer(amount: number, source = 'Вражеская атака'): void {
     const player = this.player;
     if (this.training || player.invulnerable > 0 || player.hp <= 0 || this.status !== 'playing') return;
+    if (this.specialWave === 'sanctuary' && this.safeZone && distanceSquared(player.x, player.y, this.safeZone.x, this.safeZone.y) <= this.safeZone.radius ** 2) amount *= 0.65;
     this.damageTaken += amount;
     let damage = Math.max(1, amount - this.stats.armor);
     const hadShield = player.shield > 0;
@@ -1419,6 +1527,16 @@ export class Game {
     const { x, y, kind, elite } = enemy;
     const index = this.enemies.items.indexOf(enemy);
     if (index < 0) return;
+    if (enemy.squadRole === 'leader') {
+      this.squadLeaders.delete(enemy.squadId);
+      for (const ally of this.enemies.items) {
+        if (ally.squadId === enemy.squadId && ally !== enemy) ally.slow = Math.min(ally.slow, 0.55);
+      }
+      if (!this.brokenSquads.has(enemy.squadId)) {
+        this.brokenSquads.add(enemy.squadId);
+        this.view?.announce('ЗВЕНО РАЗРУШЕНО', 'Поддержка временно ослаблена');
+      }
+    }
     this.renderer.releaseEnemy(enemy);
     this.enemies.releaseAt(index);
     this.spawnExplosion(x, y, kind === 'boss' ? 0xff4fc7 : elite ? 0xffc95e : 0xff6b69, kind === 'boss' ? 3.2 : elite ? 1.4 : 0.8);
@@ -1646,6 +1764,13 @@ export class Game {
       if (this.trainingTime <= 0) this.finishRun();
       return;
     }
+    if (this.mode === 'blitz') {
+      this.modeTime = Math.max(0, this.modeTime - dt);
+      if (this.modeTime <= 0) {
+        this.finishRun(true);
+        return;
+      }
+    }
     if (this.mode === 'bossRush') {
       if (this.intermission > 0) {
         this.intermission -= dt;
@@ -1688,7 +1813,7 @@ export class Game {
       }
     }
     if (!this.bossActive && this.waveRemaining <= 0 && this.enemies.items.length === 0) {
-      const bonus = 2 + Math.floor(this.wave / 2);
+      const bonus = Math.floor((2 + Math.floor(this.wave / 2)) * (this.specialWave === 'crossfire' ? 1.5 : 1));
       this.cores += bonus;
       this.score += this.wave * 500;
       if (this.wave % 5 === 0 && !this.routeChosen) {
@@ -1733,11 +1858,14 @@ export class Game {
     } else {
       this.bossActive = false;
       this.waveRemaining = Math.floor((8 + this.wave * 3 + (this.difficulty === 'hardcore' ? 4 : 0)) * this.sectorDefinition.budgetMultiplier);
-      this.view?.announce(`ВОЛНА ${this.wave}`, this.wave === 1 ? 'ЛКМ — blaster · ПКМ — ракеты' : this.sectorDefinition.name);
+      this.specialWave = this.wave % 6 === 0 ? SPECIAL_WAVE_IDS[Math.floor(this.wave / 6) % SPECIAL_WAVE_IDS.length] : undefined;
+      if (this.specialWave) this.startSpecialWave(this.specialWave);
+      else this.view?.announce(`ВОЛНА ${this.wave}`, this.wave === 1 ? 'ЛКМ — blaster · ПКМ — ракеты' : this.sectorDefinition.name);
     }
   }
 
   private spawnFormation(): void {
+    if ((this.specialWave === 'crossfire' || (this.wave >= 6 && this.wave % 4 === 0 && this.sector !== 'swarm')) && this.spawnSquad()) return;
     const unlocked = (Object.keys(UNLOCK_WAVES) as Array<keyof typeof UNLOCK_WAVES>).filter((kind) => UNLOCK_WAVES[kind] <= this.wave);
     const available = this.sector === 'swarm' ? unlocked.filter((kind) => kind === 'scout' || kind === 'weaver') : unlocked;
     let kind = this.rng.pick(available);
@@ -1752,6 +1880,30 @@ export class Game {
       this.spawnEnemy(kind, clamp(center + offset, 45, this.renderer.width - 45), -60 - Math.abs(offset) * 0.45 - index * 12, this.rng.chance(eliteChance));
     }
     this.waveRemaining -= size;
+  }
+
+  private spawnSquad(): boolean {
+    if (this.waveRemaining < 5) return false;
+    const definition = SQUAD_LIST[Math.floor(this.wave / 4) % SQUAD_LIST.length]!;
+    const squadId = this.nextSquadId++;
+    const center = this.renderer.width * (0.35 + (this.wave % 3) * 0.15);
+    const spread = Math.min(1, this.renderer.width / 900);
+    const leader = this.spawnEnemy(definition.leaderKind, center, -80, true);
+    if (!leader) return false;
+    leader.squadId = squadId;
+    leader.squadRole = 'leader';
+    leader.affixes |= definition.leaderAffixes;
+    this.squadLeaders.set(squadId, leader);
+    for (const member of definition.members) {
+      const enemy = this.spawnEnemy(member.kind, clamp(center + member.dx * spread, 45, this.renderer.width - 45), -80 + member.dy * spread, member.elite ?? false);
+      if (!enemy) continue;
+      enemy.squadId = squadId;
+      enemy.squadRole = 'support';
+      if (member.affixes) enemy.affixes |= member.affixes;
+    }
+    this.waveRemaining = Math.max(0, this.waveRemaining - (definition.members.length + 1));
+    this.view?.announce(`ЗВЕНО: ${definition.name}`, definition.hint);
+    return true;
   }
 
   private spawnEnemy(kind: EnemyKind, x: number, y: number, elite = false, summoned = false): Enemy | undefined {
@@ -1801,6 +1953,8 @@ export class Game {
     enemy.teleportTargetX = 0;
     enemy.teleportTargetY = 0;
     enemy.formationShield = 1;
+    enemy.squadId = 0;
+    enemy.squadRole = undefined;
     if (elite && kind !== 'boss' && kind !== 'meteor' && kind !== 'turret' && kind !== 'generator' && !this.training && this.wave >= 4) {
       enemy.affixes = 1 << (enemy.id % 4);
       if (this.wave >= 15) enemy.affixes |= 1 << ((enemy.id + 1) % 4);
@@ -1989,6 +2143,8 @@ export class Game {
       overdrive: this.overdrive,
       sectorName: this.sectorDefinition.name,
       sectorIcon: this.sectorDefinition.icon,
+      specialWave: this.specialWave ? SPECIAL_WAVE_INFO[this.specialWave].name : undefined,
+      modeTime: this.modeTime,
       weaponName: WEAPONS[this.weapon].shortName,
       weaponHeat: this.player.beamHeat / 100,
       weaponOverheated: this.player.beamOverheated > 0,
@@ -2103,6 +2259,9 @@ export class Game {
     this.affixFormationTimer = 0;
     this.affixesAnnounced = false;
     this.runVictory = false;
+    this.squadLeaders.clear();
+    this.nextSquadId = 1;
+    this.brokenSquads.clear();
   }
 
   private startStressScenario(): void {
@@ -2167,6 +2326,7 @@ export class Game {
       elite: false, scale: 1, flash: 0, slow: 1, burnTime: 0, burnDps: 0, burnTick: 0,
       bossPhase: 0, attackTimer: 0, telegraph: 0, summoned: false, trainingTarget: false, bossVariant: 0, vulnerability: 0,
       affixes: 0, affixTimer: 1.5, teleportTimer: 3, teleportTelegraph: 0, teleportTargetX: 0, teleportTargetY: 0, formationShield: 1,
+      squadId: 0, squadRole: undefined,
     };
   }
 

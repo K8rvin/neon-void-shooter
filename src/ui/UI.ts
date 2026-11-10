@@ -1,5 +1,6 @@
 import { formatNumber, formatTime } from '../core/math';
 import { assetUrl } from '../core/assets';
+import { getShareBuild, decodeBuild } from '../core/share';
 import type { QualitySetting } from '../core/save';
 import { createBaseStats, META_UPGRADES, metaCost } from '../game/config/meta';
 import { getBuildAnalytics } from '../game/analysis';
@@ -266,8 +267,8 @@ export class UI implements GameView {
     this.element('shield-text').textContent = snapshot.maxShield > 0 ? `${Math.ceil(snapshot.shield)} / ${Math.ceil(snapshot.maxShield)}` : 'НЕТ ЩИТА';
     this.element('hud-level').textContent = `${snapshot.level}`;
     this.element('hud-xp').textContent = `${Math.floor(snapshot.xp)} / ${snapshot.xpNext}`;
-    this.element('hud-wave').textContent = snapshot.training ? `ПОЛИГОН · ${Math.ceil(snapshot.trainingTime ?? 0)} С` : this.game.mode === 'bossRush' ? `BOSS RUSH · ${snapshot.wave}/6` : `ВОЛНА ${snapshot.wave} · УГРОЗА ${snapshot.threat}`;
-    this.element('hud-sector').textContent = `${snapshot.sectorIcon} ${snapshot.sectorName} · ${snapshot.modeName}`;
+    this.element('hud-wave').textContent = snapshot.training ? `ПОЛИГОН · ${Math.ceil(snapshot.trainingTime ?? 0)} С` : this.game.mode === 'blitz' ? `ПЕРЕГРУЗКА · ${Math.ceil(snapshot.modeTime)} С` : this.game.mode === 'bossRush' ? `BOSS RUSH · ${snapshot.wave}/6` : `ВОЛНА ${snapshot.wave} · УГРОЗА ${snapshot.threat}`;
+    this.element('hud-sector').textContent = `${snapshot.sectorIcon} ${snapshot.sectorName}${snapshot.specialWave ? ` · ${snapshot.specialWave}` : ''} · ${snapshot.modeName}`;
     this.element('hud-score').textContent = formatNumber(snapshot.score);
     this.element('hud-cores').textContent = formatNumber(snapshot.cores);
     this.element('hud-combo').textContent = `×${snapshot.combo.toFixed(1)}`;
@@ -481,6 +482,10 @@ export class UI implements GameView {
           break;
         case 'start-run': this.game.startRun(this.difficulty, this.selectedWeapon, this.selectedAbility, this.game.save.data.selectedShip, this.selectedMode); break;
         case 'start-training': this.game.startRun(this.difficulty, this.selectedWeapon, this.selectedAbility, this.game.save.data.selectedShip, this.selectedMode, true); break;
+        case 'export-build': void this.exportBuild(); break;
+        case 'copy-build': void this.copyBuildCode(); break;
+        case 'close-share': this.element('share-modal').classList.remove('active'); break;
+        case 'import-build': this.importBuild(); break;
         case 'touch-missiles': this.game.fireSecondaryWeapon(); break;
         case 'touch-ability': this.game.activateAbility(); break;
         case 'touch-secondary': this.game.activateSecondaryAbility(); break;
@@ -523,6 +528,41 @@ export class UI implements GameView {
       else input.value = String(value);
     }
     document.body.classList.toggle('left-handed', settings.leftHanded);
+  }
+
+  private async exportBuild(): Promise<void> {
+    const output = this.element('share-code-output') as HTMLTextAreaElement;
+    output.value = getShareBuild(this.game);
+    this.element('share-modal').classList.add('active');
+    await this.copyBuildCode();
+  }
+
+  private async copyBuildCode(): Promise<void> {
+    const output = this.element('share-code-output') as HTMLTextAreaElement;
+    output.focus();
+    output.select();
+    const status = this.element('share-status');
+    if (!navigator.clipboard) {
+      status.textContent = 'Код готов — скопируйте его вручную';
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(output.value);
+      status.textContent = 'Код скопирован в буфер обмена';
+    } catch {
+      status.textContent = 'Код готов — скопируйте его вручную';
+    }
+  }
+
+  private importBuild(): void {
+    try {
+      const input = this.element('build-code-input') as HTMLTextAreaElement;
+      const build = decodeBuild(input.value);
+      this.game.startSharedTraining(build);
+      this.element('build-import-status').textContent = 'Сборка запущена на полигоне. Награды отключены.';
+    } catch (error) {
+      this.element('build-import-status').textContent = error instanceof Error ? error.message : 'Некорректный код сборки';
+    }
   }
 
   private updateDifficulty(): void {
@@ -629,6 +669,7 @@ export class UI implements GameView {
             <section class="loadout-section"><h3>МОДУЛЬ МАСТЕРСТВА</h3><div id="loadout-mastery" class="loadout-mastery"></div></section>
             <div class="loadout-small-options"><section class="loadout-section"><h3>СЛОЖНОСТЬ</h3><div class="loadout-choice-row compact"><button data-difficulty="veteran">ВЕТЕРАН</button><button data-difficulty="hardcore">ХАРДКОР</button></div></section><section class="loadout-section"><h3>РЕЖИМ</h3><div class="loadout-choice-row compact">${RUN_MODE_LIST.map((mode) => `<button data-mode="${mode.id}">${mode.name}</button>`).join('')}</div><p id="loadout-mode-description"></p></section></div>
             <div class="loadout-actions"><button class="primary-button loadout-start" data-action="start-run"><span>НАЧАТЬ МИССИЮ</span><b>↗</b></button><button class="secondary-button training-button" data-action="start-training"><span>ПОЛИГОН · 45 С</span><small>БЕЗ НАГРАД</small></button></div>
+            <details class="build-share"><summary>ПОДЕЛИТЬСЯ СБОРКОЙ · ПОЛИГОН</summary><textarea id="build-code-input" maxlength="4096" spellcheck="false" aria-label="Код сборки для полигона" placeholder="Вставьте код сборки для полигона"></textarea><div class="build-share-actions"><button class="secondary-button" data-action="import-build">ЗАПУСТИТЬ НА ПОЛИГОНЕ</button></div><p id="build-import-status" class="build-share-status"></p></details>
           </main>
         </div>
       </section>
@@ -654,7 +695,7 @@ export class UI implements GameView {
 
       <div id="route-overlay" class="overlay levelup-overlay route-overlay"><div class="levelup-heading"><span>СЕКТОР ЗАЧИЩЕН · НАВИГАЦИЯ</span><h2>ВЫБЕРИ МАРШРУТ</h2><p>Выбранный модификатор действует следующие пять волн. Награда соответствует риску.</p></div><div id="route-cards" class="upgrade-cards"></div><div class="route-hint">Клавиши 1–3 также выбирают маршрут</div></div>
 
-      <div id="pause-overlay" class="overlay pause-overlay"><div class="dialog pause-dialog"><span class="dialog-eyebrow">СИМУЛЯЦИЯ ПРИОСТАНОВЛЕНА</span><h2>ПАУЗА</h2><div class="pause-analytics"><div><span>ОСНОВНОЙ DPS</span><b id="pause-primary-dps">0</b></div><div><span>РАКЕТЫ / С</span><b id="pause-missile-dps">0</b></div><div><span>КРИТ / МНОЖИТЕЛЬ</span><b id="pause-crit">0</b></div><div><span>ПРОБИТИЕ / ЦЕПИ</span><b id="pause-links">0</b></div><div><span>ДРОНЫ</span><b id="pause-drones">0</b></div><div><span>КОРПУС / ЩИТ / БРОНЯ</span><b id="pause-defense">0</b></div></div><div class="pause-build-caption">СБОРКА ЗАБЕГА</div><div id="pause-build-list" class="pause-build-list"></div><button class="primary-button" data-action="resume">ПРОДОЛЖИТЬ <b>→</b></button><button class="secondary-button" data-action="settings">НАСТРОЙКИ</button><button class="secondary-button danger" data-action="menu">ЗАВЕРШИТЬ ЗАБЕГ</button><p>ESC / P — продолжить · M — звук</p></div></div>
+      <div id="pause-overlay" class="overlay pause-overlay"><div class="dialog pause-dialog"><span class="dialog-eyebrow">СИМУЛЯЦИЯ ПРИОСТАНОВЛЕНА</span><h2>ПАУЗА</h2><div class="pause-analytics"><div><span>ОСНОВНОЙ DPS</span><b id="pause-primary-dps">0</b></div><div><span>РАКЕТЫ / С</span><b id="pause-missile-dps">0</b></div><div><span>КРИТ / МНОЖИТЕЛЬ</span><b id="pause-crit">0</b></div><div><span>ПРОБИТИЕ / ЦЕПИ</span><b id="pause-links">0</b></div><div><span>ДРОНЫ</span><b id="pause-drones">0</b></div><div><span>КОРПУС / ЩИТ / БРОНЯ</span><b id="pause-defense">0</b></div></div><div class="pause-build-caption">СБОРКА ЗАБЕГА</div><div id="pause-build-list" class="pause-build-list"></div><button class="primary-button" data-action="resume">ПРОДОЛЖИТЬ <b>→</b></button><button class="secondary-button" data-action="settings">НАСТРОЙКИ</button><button class="secondary-button" data-action="export-build">КОД СБОРКИ</button><button class="secondary-button danger" data-action="menu">ЗАВЕРШИТЬ ЗАБЕГ</button><p>ESC / P — продолжить · M — звук</p></div></div>
 
       <section class="screen gameover-screen" data-screen="gameover"><div class="gameover-panel">
         <span id="result-eyebrow" class="dialog-eyebrow">NV–01 // ЖУРНАЛ ЗАБЕГА</span>
@@ -664,7 +705,7 @@ export class UI implements GameView {
         <div class="result-analysis"><section class="result-panel"><h3>УРОН ПО ИСТОЧНИКАМ</h3><div id="result-damage"></div><div id="result-synergy" class="result-synergy"></div></section><section class="result-panel"><h3>ИТОГ ЗАБЕГА</h3><div id="result-death" class="result-death"></div><div id="result-mastery" class="result-mastery"></div></section></div>
         <div class="result-build"><span>СБОРКА ЗАБЕГА</span><div id="result-build"></div></div>
         <section class="result-panel result-history-panel"><h3>ХРОНОЛОГИЯ УЛУЧШЕНИЙ</h3><div id="result-history" class="result-history"></div></section>
-        <div class="gameover-actions"><button class="primary-button" data-action="restart">ЕЩЁ ОДИН ЗАБЕГ <b>↗</b></button><button class="secondary-button" data-action="hangar">В АНГАР</button><button class="text-button" data-action="menu">ГЛАВНОЕ МЕНЮ</button></div>
+        <div class="gameover-actions"><button class="primary-button" data-action="restart">ЕЩЁ ОДИН ЗАБЕГ <b>↗</b></button><button class="secondary-button" data-action="hangar">В АНГАР</button><button class="secondary-button" data-action="export-build">КОД СБОРКИ</button><button class="text-button" data-action="menu">ГЛАВНОЕ МЕНЮ</button></div>
       </div></section>
 
       <div id="challenges-modal" class="overlay settings-modal"><div class="dialog settings-dialog challenges-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">РЕЖИМЫ // РЕКОРДЫ // ДОСТИЖЕНИЯ</span><h2>ИСПЫТАНИЯ</h2></div><button class="icon-button" data-action="close-challenges" aria-label="Закрыть">×</button></div><div id="mode-grid" class="mode-grid"></div><div class="challenge-columns"><section><h3>ЛОКАЛЬНЫЕ РЕКОРДЫ</h3><div id="records-list" class="records-list"></div><div id="platform-records" class="online-records"></div></section><section><h3>ДОСТИЖЕНИЯ</h3><div id="achievements-list" class="achievements-list"></div></section></div></div></div>
@@ -672,6 +713,7 @@ export class UI implements GameView {
       <div id="codex-modal" class="overlay settings-modal"><div class="dialog settings-dialog challenges-dialog codex-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">АРХИВ СИНЕРГИЙ · <b id="codex-count">0 / 6</b></span><h2>КОДЕКС ЭВОЛЮЦИЙ</h2></div><button class="icon-button" data-action="close-codex" aria-label="Закрыть кодекс">×</button></div><div id="codex-grid" class="codex-grid"></div></div></div>
 
       <div id="settings-modal" class="overlay settings-modal"><div class="dialog settings-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">СИСТЕМНАЯ КОНФИГУРАЦИЯ</span><h2>НАСТРОЙКИ</h2></div><button class="icon-button" data-action="close-settings" aria-label="Закрыть">×</button></div><label class="range-setting"><span>ОБЩАЯ ГРОМКОСТЬ</span><input type="range" min="0" max="1" step="0.05" data-setting="masterVolume"></label><label class="range-setting"><span>МУЗЫКА</span><input type="range" min="0" max="1" step="0.05" data-setting="musicVolume"></label><label class="range-setting"><span>ЭФФЕКТЫ</span><input type="range" min="0" max="1" step="0.05" data-setting="sfxVolume"></label><label class="range-setting"><span>ИНТЕНСИВНОСТЬ ЧАСТИЦ</span><input type="range" min="0" max="1" step="0.05" data-setting="particles"></label><label class="select-setting"><span>КАЧЕСТВО ЭФФЕКТОВ</span><select data-setting="quality"><option value="auto">Авто (рекомендуется)</option><option value="high">Высокое</option><option value="medium">Среднее</option><option value="low">Низкое</option></select></label><label class="toggle-setting"><span>ТРЯСКА КАМЕРЫ<small>Отзывчивость взрывов и попаданий</small></span><input type="checkbox" data-setting="screenShake"><i></i></label><label class="toggle-setting"><span>ЧИСЛА УРОНА<small>Можно отключить для чистоты экрана</small></span><input type="checkbox" data-setting="damageNumbers"><i></i></label><label class="toggle-setting"><span>СНИЖЕНИЕ ВСПЫШЕК<small>Ослабление ярких экранных эффектов</small></span><input type="checkbox" data-setting="reducedFlashes"><i></i></label><details class="touch-settings"><summary>МОБИЛЬНОЕ УПРАВЛЕНИЕ</summary><label class="select-setting"><span>РЕЖИМ ДВИЖЕНИЯ</span><select data-setting="touchMode"><option value="relative">Движение за пальцем</option><option value="absolute">Точно в точку касания</option></select></label><label class="range-setting"><span>ЧУВСТВИТЕЛЬНОСТЬ</span><input type="range" min="0.5" max="1.75" step="0.05" data-setting="touchSensitivity"></label><label class="range-setting"><span>СМЕЩЕНИЕ НАД ПАЛЬЦЕМ</span><input type="range" min="0" max="96" step="8" data-setting="touchOffset"></label><label class="toggle-setting"><span>КНОПКИ СЛЕВА<small>Левостороннее управление</small></span><input type="checkbox" data-setting="leftHanded"><i></i></label></details><div class="controls-help"><span>УПРАВЛЕНИЕ</span><p><b>Мышь / WASD</b> движение · <b>ЛКМ / Space</b> blaster</p><p><b>ПКМ / Shift / R</b> ракеты · <b>Esc / P</b> пауза · <b>F3</b> FPS</p></div><button class="secondary-button fullscreen-button" data-action="fullscreen">ПОЛНЫЙ ЭКРАН</button><button class="text-button reset-button" data-action="reset">Сбросить прогресс</button><a class="credits" href="https://kenney.nl/assets/space-shooter-redux" target="_blank" rel="noreferrer">Графика и сэмплы: Kenney · CC0</a></div></div>
+      <div id="share-modal" class="overlay settings-modal"><div class="dialog settings-dialog"><div class="settings-heading"><div><span class="dialog-eyebrow">ОБМЕН СБОРКАМИ · ТОЛЬКО ПОЛИГОН</span><h2>КОД СБОРКИ</h2></div><button class="icon-button" data-action="close-share" aria-label="Закрыть">×</button></div><p class="difficulty-description">Запуск общей сборки на полигоне не даёт наград, рекордов, открытий или мастерства.</p><textarea id="share-code-output" class="build-share-textarea" readonly spellcheck="false" aria-label="Код сборки"></textarea><div class="build-share-actions"><button class="secondary-button" data-action="copy-build">КОПИРОВАТЬ</button><button class="text-button" data-action="close-share">ЗАКРЫТЬ</button></div><p id="share-status" class="build-share-status"></p></div></div>
     `;
   }
 }

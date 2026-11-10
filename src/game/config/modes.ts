@@ -1,4 +1,4 @@
-export type RunMode = 'standard' | 'daily' | 'rockets' | 'oneHp' | 'elite' | 'bossRush';
+export type RunMode = 'standard' | 'daily' | 'rockets' | 'oneHp' | 'elite' | 'bossRush' | 'blitz';
 
 export interface RunModeDefinition {
   id: RunMode;
@@ -14,6 +14,7 @@ export const RUN_MODES: Record<RunMode, RunModeDefinition> = {
   oneHp: { id: 'oneHp', name: 'ОДИН HP', description: 'Корпус и щит равны нулю/единице. Любое незаблокированное попадание смертельно. Очки ×3.', scoreMultiplier: 3 },
   elite: { id: 'elite', name: 'СПЛОШНАЯ ЭЛИТА', description: 'Все обычные противники элитные. Очки ×2.', scoreMultiplier: 2 },
   bossRush: { id: 'bossRush', name: 'BOSS RUSH', description: 'Шесть боссов подряд без карт. Усиленный старт, восстановление после побед. Очки ×2.', scoreMultiplier: 2 },
+  blitz: { id: 'blitz', name: 'ПЕРЕГРУЗКА · 6 МИН', description: 'Шесть минут боя в элитном секторе. Урон ×1,9, темп ×1,15, XP ×1,5. Дожить до конца.', scoreMultiplier: 1.75 },
 };
 
 export const RUN_MODE_LIST = Object.values(RUN_MODES);

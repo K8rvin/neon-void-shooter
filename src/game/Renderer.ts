@@ -21,7 +21,7 @@ import { SECTORS } from './config/sectors';
 import type { SectorId } from './config/sectors';
 import { SHIPS } from './config/ships';
 import { MASTERY_TRAIL_XP } from './config/mastery';
-import type { Bullet, EffectParticle, EffectTexture, Enemy, Pickup } from './types';
+import type { Bullet, EffectParticle, EffectTexture, Enemy, MovingCover, Pickup } from './types';
 import type { Game } from './Game';
 
 interface Star {
@@ -310,6 +310,21 @@ export class Renderer {
     this.flashTint = tint;
   }
 
+  createCover(index: number, x: number, y: number, radius: number): Sprite {
+    const view = new Sprite(this.combatSheet?.textures[`meteor-${index % 4 + 1}.png`] ?? this.texture('meteorGrey_big1.png'));
+    view.anchor.set(0.5);
+    view.position.set(x, y);
+    view.width = radius * 2;
+    view.height = radius * 2;
+    view.alpha = 0.86;
+    this.world.addChild(view);
+    return view;
+  }
+
+  releaseCover(cover: MovingCover): void {
+    cover.view?.destroy();
+  }
+
   private createScene(): void {
     this.background = new Sprite(this.makeBackgroundTexture());
     this.defaultBackground = this.background.texture;
@@ -576,6 +591,13 @@ export class Renderer {
       this.telegraphs.moveTo(gapLeft, wall.y - 22).lineTo(gapLeft, wall.y + 22).stroke({ color: 0x65ffd7, width: 2, alpha: 0.8 });
       this.telegraphs.moveTo(gapRight, wall.y - 22).lineTo(gapRight, wall.y + 22).stroke({ color: 0x65ffd7, width: 2, alpha: 0.8 });
     }
+    const safeZone = game.safeZone;
+    if (safeZone) {
+      const color = safeZone.rewarded ? 0xffd568 : 0x72ffb0;
+      this.telegraphs.circle(safeZone.x, safeZone.y, safeZone.radius).fill({ color, alpha: 0.04 });
+      this.telegraphs.circle(safeZone.x, safeZone.y, safeZone.radius).stroke({ color, width: 2, alpha: 0.55 });
+      this.telegraphs.arc(safeZone.x, safeZone.y, safeZone.radius - 7, -Math.PI * 0.5, -Math.PI * 0.5 + TAU * safeZone.charge / 5).stroke({ color, width: 4, alpha: 0.85 });
+    }
     const zone = game.controlZone;
     if (zone?.active) {
       const color = zone.captured > 0 ? 0x65ffc2 : 0x62f5ff;
@@ -586,6 +608,15 @@ export class Renderer {
     let kamikazeWarnings = 0;
     for (const enemy of game.enemies.items) {
       this.drawEliteAffixes(game, enemy);
+      if (enemy.squadRole) {
+        const leader = game.squadLeaders.get(enemy.squadId);
+        if (leader && leader !== enemy && (leader.x - enemy.x) ** 2 + (leader.y - enemy.y) ** 2 < 250 ** 2) this.telegraphs.moveTo(enemy.x, enemy.y).lineTo(leader.x, leader.y).stroke({ color: 0xffd47a, width: 1, alpha: 0.18 });
+        if (enemy.squadRole === 'leader') {
+          const x = enemy.x;
+          const y = enemy.y - enemy.radius - 34;
+          this.healthBars.poly([x, y - 7, x - 7, y, x, y + 7, x + 7, y], true).stroke({ color: 0xffe575, width: 2, alpha: 0.85 });
+        }
+      }
       if (enemy.kind === 'boss') {
         if (enemy.bossVariant === 0 || enemy.bossVariant === 5) this.telegraphs.circle(enemy.x, enemy.y, enemy.radius + 13).stroke({ color: enemy.vulnerability > 0 ? 0x65ffc2 : enemy.bossVariant === 5 ? 0xffd36a : 0xff5b9d, width: 3, alpha: 0.55 });
         if (enemy.bossVariant === 2) {

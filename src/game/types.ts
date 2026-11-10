@@ -123,6 +123,8 @@ export interface Enemy {
   teleportTargetX: number;
   teleportTargetY: number;
   formationShield: number;
+  squadId: number;
+  squadRole?: 'leader' | 'support';
   view?: Sprite;
 }
 
@@ -144,6 +146,22 @@ export interface ControlZone {
   progress: number;
   captured: number;
   moveTimer: number;
+}
+
+export interface SafeZone {
+  x: number;
+  y: number;
+  radius: number;
+  charge: number;
+  rewarded: boolean;
+}
+
+export interface MovingCover {
+  x: number;
+  y: number;
+  radius: number;
+  vx: number;
+  view?: Sprite;
 }
 
 export interface RiftPortalPair {
@@ -315,6 +333,8 @@ export interface HudSnapshot {
   abilityActive: boolean;
   secondaryName: string;
   secondaryCooldown: number;
+  specialWave?: string;
+  modeTime: number;
   modeName: string;
   threat: number;
   seed: number;
